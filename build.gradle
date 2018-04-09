@@ -1,8 +1,17 @@
+//Spring-boot gradle plugin
+plugins {
+	id 'org.springframework.boot' version '2.0.1.RELEASE'
+}
 
-apply plugin : 'java'
-apply plugin : 'war'
+apply plugin: 'java'
+apply plugin: 'war'
+apply plugin: 'idea'
+apply plugin: 'org.springframework.boot'
+apply plugin: 'io.spring.dependency-management'
 
 repositories {
+    jcenter()
+    maven { url 'https://jitpack.io' }
     mavenCentral()
 }
 
@@ -10,15 +19,25 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 dependencies {
-    compile("org.springframework.boot:spring-boot-starter-web:2.0.0.RELEASE")
+    //Spring-boot
+    compile 'org.springframework.boot:spring-boot-starter-web'
+    //Embeded tomcat
+    compile 'org.springframework.boot:spring-boot-starter-tomcat'
+    providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'
+    //Persistence
+    compile 'org.springframework.boot:spring-boot-starter-data-jpa'
+    compile 'org.hibernate:hibernate-entitymanager:5.0.7.Final'
+    compile 'org.hibernate:hibernate-core:5.0.7.Final'
+    compile 'org.xerial:sqlite-jdbc:3.8.11'
+    compile 'com.github.gwenn:sqlite-dialect:-SNAPSHOT'
+
     // https://mvnrepository.com/artifact/org.javamoney/moneta-bp
     compile group: 'org.javamoney', name: 'moneta-bp', version: '1.1'
-
 
     testCompile "junit:junit:4.12"
 }
 
-jar {
+war {
     baseName = 'katapi-springboot'
     version =  '0.0.0'
 }

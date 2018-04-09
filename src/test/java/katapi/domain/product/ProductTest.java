@@ -4,7 +4,7 @@ import javax.money.Monetary;
 
 import static org.junit.Assert.*;
 
-public class ProduitTest {
+public class ProductTest {
 
 
 }
