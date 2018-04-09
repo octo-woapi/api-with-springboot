@@ -1,7 +1,7 @@
 # api-with-springboot
-Kata products implemented in Spring Boot
+> Kata products implemented in Spring Boot
 
-# Features
+## Features
 
 Shopping API with products, orders and bills.
 
@@ -21,3 +21,11 @@ Shopping API with products, orders and bills.
   - Can be listed
   - Have an amount and a creation date
   - Are automatically generated when an order status is set to paid
+  
+## Getting started
+  Install Gradle https://gradle.org/install/
+  Clone the project in a new directory
+  Build the project
+  ```
+  $ gradle build
+  ```
