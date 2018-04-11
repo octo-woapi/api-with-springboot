@@ -4,8 +4,10 @@
 ## Getting started
   
  - Install [Gradle](https://gradle.org/install/)   
- - Clone the project in a new directory  
- - Build the project : ``` $ gradle build```
+ - Create a new directory and clone the project in it
+ - Build the project : ```$ gradle clean build```
+ - Run the project : ```java -jar build/libs/api-with-springboot.jar```
+ - Open a new tab in your browser and go to http://localhost:8080/products
 
 ## Features
 
