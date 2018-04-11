@@ -4,7 +4,7 @@ import katapi.domain.product.Product;
 
 import java.util.List;
 
-public interface ProductServiceInterface {
+public interface ProductService {
 
     public List<Product> getAllProducts();
 }

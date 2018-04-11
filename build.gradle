@@ -33,6 +33,8 @@ dependencies {
     //providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'
 
     //Persistence
+    compile 'org.springframework:spring-jdbc'
+    compile 'com.h2database:h2'
     //compile 'org.springframework.boot:spring-boot-starter-data-jpa'
     //compile 'org.hibernate:hibernate-entitymanager:5.0.7.Final'
     //compile 'org.hibernate:hibernate-core:5.0.7.Final'
