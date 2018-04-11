@@ -1,12 +1,10 @@
 package katapi.domain.product;
 
-import javax.money.Monetary;
-
-public class Produit {
+public class Product {
 
     private Long id;
     private String name;
-    private Monetary price;
+    private Number price;
     private Double weight;
 
 

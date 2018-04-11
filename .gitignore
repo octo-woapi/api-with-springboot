@@ -1,7 +1,9 @@
 *.xml
 *.iml
+*.class
 
 build/
+out/
 
 .gradle/
 **/.gradle/
