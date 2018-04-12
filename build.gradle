@@ -25,8 +25,12 @@ targetCompatibility = 1.8
 dependencies {
     //Spring-boot
     compile 'org.springframework.boot:spring-boot-starter-web'
-    compile("org.springframework.boot:spring-boot-starter-thymeleaf")
+    compile 'org.springframework.boot:spring-boot-starter-thymeleaf'
     compile 'org.springframework.boot:spring-boot-devtools'
+
+    //Unit tests
+    testCompile 'org.springframework.boot:spring-boot-starter-test'
+    testCompile 'junit:junit:4.12'
 
     //Embeded tomcat
     compile 'org.springframework.boot:spring-boot-starter-tomcat'
@@ -42,7 +46,6 @@ dependencies {
     // https://mvnrepository.com/artifact/org.javamoney/moneta-bp
     //compile group: 'org.javamoney', name: 'moneta-bp', version: '1.1'
 
-    testCompile "junit:junit:4.12"
 }
 
 jar {

@@ -7,6 +7,7 @@ import static org.junit.Assert.assertTrue;
 
 public class ProductTest {
 
+    @Ignore
     @Test
     public void testNothing(){
         assertTrue(true);
@@ -17,4 +18,6 @@ public class ProductTest {
     public void testRed(){
         assertTrue(false);
     }
+
+
 }
