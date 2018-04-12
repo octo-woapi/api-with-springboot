@@ -45,7 +45,7 @@ dependencies {
     testCompile "junit:junit:4.12"
 }
 
-jar {
+war {
     baseName = 'katapi-springboot'
     version =  '0.1.0'
 }

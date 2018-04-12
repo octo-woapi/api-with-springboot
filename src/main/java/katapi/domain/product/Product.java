@@ -4,17 +4,18 @@ public class Product {
 
     private Long id;
     private String name;
-    private Number price;
+    private Double price;
     private Double weight;
 
-    public Product(Long id, String name, Number price, Double weight) {
+    public Product() {
+    }
+
+    public Product(Long id, String name, Double price, Double weight) {
         this.id = id;
         this.name = name;
         this.price = price;
         this.weight = weight;
     }
-
-    public Product(){}
 
     public Long getId() {
         return id;
@@ -32,11 +33,11 @@ public class Product {
         this.name = name;
     }
 
-    public Number getPrice() {
+    public Double getPrice() {
         return price;
     }
 
-    public void setPrice(Number price) {
+    public void setPrice(Double price) {
         this.price = price;
     }
 
