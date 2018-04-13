@@ -12,19 +12,19 @@ import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-@SpringBootTest
-@AutoConfigureTestDatabase
-public class KatapiAppTest implements CommandLineRunner {
-
+//@SpringBootTest
+//@AutoConfigureTestDatabase
+public class KatapiAppTest //implements CommandLineRunner {
+{
     private static final Logger log = LoggerFactory.getLogger(KatapiAppTest.class);
 
 
-    public static void main(String[] args) {
-        SpringApplication.run(KatapiAppTest.class, args);
-    }
+    //public static void main(String[] args) {
+      //  SpringApplication.run(KatapiAppTest.class, args);
+    //}
 
     //initialize database
-    @Autowired
+ /*   @Autowired
     JdbcTemplate jdbc;
 
     @Override
@@ -40,5 +40,5 @@ public class KatapiAppTest implements CommandLineRunner {
         jdbc.execute("CREATE TABLE orders(id INTEGER PRIMARY KEY, status VARCHAR, shipment_amount NUMERIC, total_price NUMERIC)");
         jdbc.execute("CREATE TABLE orders_content(order_id INTEGER, product_id INTEGER)");
     }
-
+*/
 }

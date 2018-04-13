@@ -8,28 +8,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
+import java.util.Collection;
 
-@Controller
+@RestController
 public class ProductController {
 
     private static final Logger log = LoggerFactory.getLogger(ProductController.class);
-
 
     @Autowired
     ProductService productService;
 
     @GetMapping("/products")
-    public String greeting(Model model) {
-
-        String stringResult = productService.getAllProducts()
-                .stream()
-                .map(product -> product.toString())
-                .reduce("", String::concat);
-
-        model.addAttribute("product", stringResult);
-        return "product_page";
+    public Collection<Product> listAllProducts() {
+        return productService.getAllProducts();
     }
 }
