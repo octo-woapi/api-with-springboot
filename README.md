@@ -7,7 +7,7 @@
  - Create a new directory and clone the project : ```$ git clone https://github.com/octo-woapi/api-with-springboot.git```
  - Build the project : ```$ gradle clean build```
  - Run the project : ```$ java -jar build/libs/api-with-springboot.jar```
- - Open a new tab in your browser and go to http://localhost:8080/products
+ - Have fun : ```$ curl -G http://localhost:8080/products/ ```
 
 ## Features
 
