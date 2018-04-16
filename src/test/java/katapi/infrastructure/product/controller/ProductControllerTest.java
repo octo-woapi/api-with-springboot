@@ -6,6 +6,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.hateoas.MediaTypes;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
@@ -17,12 +20,11 @@ import org.springframework.web.context.WebApplicationContext;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 
-import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertNotNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.*;
 
 
@@ -35,9 +37,11 @@ public class ProductControllerTest {
                                                        INITIALISATION
      ************************************************************************************************************** */
 
-    private MediaType contentType = new MediaType(MediaType.APPLICATION_JSON.getType(),
+    private MediaType jsonType = new MediaType(MediaType.APPLICATION_JSON.getType(),
             MediaType.APPLICATION_JSON.getSubtype(),
             Charset.forName("utf8"));
+
+    private MediaType halJsonType = new MediaType("application", "hal+json", Charset.forName("UTF-8"));;
 
     private MockMvc mockMvc;
 
@@ -69,12 +73,42 @@ public class ProductControllerTest {
     }
 
     @Test
-    public void getProducts_shouldReturnAllProductsInDB() throws Exception {
-        mockMvc.perform(get("/products"))
+    public void listAllProducts_shouldReturnAllProductsInDB() throws Exception {
+        mockMvc.perform(get("/products")
+                .accept(MediaTypes.HAL_JSON)
+                .contentType(MediaTypes.HAL_JSON))
                 .andExpect(status().isOk())
-                .andExpect(content().contentType(contentType))
-                .andExpect(jsonPath("$", hasSize(7)))
+                .andExpect(header().string(HttpHeaders.CONTENT_TYPE, MediaTypes.HAL_JSON_VALUE + ";charset=UTF-8"))
+                .andExpect(content().contentType(halJsonType))
+                .andExpect(jsonPath("$.content", hasSize(7)))
                 ;
+    }
+
+    @Test
+    public void getProductById_shouldReturnTheCorrectProduct() throws Exception {
+        int idToBeTested = 1;
+        mockMvc.perform(get("/products/"+idToBeTested)
+                .accept(MediaTypes.HAL_JSON)
+                .contentType(MediaTypes.HAL_JSON))
+                .andExpect(status().isOk())
+                .andExpect(header().string(HttpHeaders.CONTENT_TYPE, MediaTypes.HAL_JSON_VALUE + ";charset=UTF-8"))
+                .andExpect(content().contentType(halJsonType))
+                .andExpect(jsonPath("$.product.id", is(idToBeTested)))
+                ;
+    }
+
+    @Test
+    public void getProductById_shouldReturn404ifNotFound() throws Exception {
+        int idToBeTested = 999;
+        mockMvc.perform(get("/products/"+idToBeTested)
+                .accept(MediaTypes.HAL_JSON)
+                .contentType(MediaTypes.HAL_JSON))
+                .andExpect(status().is4xxClientError())
+                .andExpect(status().is(HttpStatus.NOT_FOUND.value()))
+                .andExpect(header().string(HttpHeaders.CONTENT_TYPE, MediaTypes.HAL_JSON_VALUE + ";charset=UTF-8"))
+                .andExpect(content().contentType(halJsonType))
+                .andExpect(content().string(containsString("could not find product with id : "+idToBeTested)))
+        ;
     }
 
 }

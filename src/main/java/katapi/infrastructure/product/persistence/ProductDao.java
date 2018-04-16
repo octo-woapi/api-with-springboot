@@ -19,4 +19,9 @@ public class ProductDao {
         List<Product> result = jdbc.query("SELECT * FROM Product", new BeanPropertyRowMapper(Product.class));
         return result;
     }
+
+    public Product getProductById(Long id){
+        Product result = (Product) jdbc.queryForObject("SELECT * FROM Product WHERE id = ?", new Object[] {id}, new BeanPropertyRowMapper(Product.class));
+        return result;
+    }
 }
