@@ -9,4 +9,5 @@ public interface ProductService {
 
     public List<Product> getAllProducts();
     public Product getProductById(Long id) throws ProductNotFoundException;
+    public Product createProduct(String name, Double price, Double weight);
 }

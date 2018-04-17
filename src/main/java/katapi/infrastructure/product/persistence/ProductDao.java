@@ -4,8 +4,10 @@ import katapi.domain.product.Product;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.stereotype.Repository;
 
+import java.sql.PreparedStatement;
 import java.util.List;
 import java.util.Map;
 
@@ -21,7 +23,25 @@ public class ProductDao {
     }
 
     public Product getProductById(Long id){
-        Product result = (Product) jdbc.queryForObject("SELECT * FROM Product WHERE id = ?", new Object[] {id}, new BeanPropertyRowMapper(Product.class));
+        Product result = (Product) jdbc.queryForObject(
+                "SELECT * FROM Product WHERE id = ?"
+                , new Object[] {id}
+                , new BeanPropertyRowMapper(Product.class));
         return result;
+    }
+
+    public Long insertProductAndReturnGeneratedID(Product product){
+        GeneratedKeyHolder keyHolder = new GeneratedKeyHolder();
+        jdbc.update(con -> {
+            PreparedStatement ps = con.prepareStatement(
+                    "INSERT INTO Product (name, price, weight) VALUES (?, ?, ?)",
+                    new String[]{"id"});
+            ps.setString(1, product.getName());
+            ps.setDouble(2, product.getPrice());
+            ps.setDouble(3, product.getWeight());
+            return ps;
+        }, keyHolder);
+
+        return keyHolder.getKey().longValue();
     }
 }

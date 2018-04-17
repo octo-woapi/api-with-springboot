@@ -7,50 +7,92 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
 import java.util.List;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertThat;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = KatapiApp.class)
 @WebAppConfiguration
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
 public class ProductServiceTest {
 
     @Autowired
     ProductService service;
 
     @Test
+    @DirtiesContext(methodMode = DirtiesContext.MethodMode.BEFORE_METHOD)
     public void getAllProducts_shouldReturnAllTuples(){
-        // WHEN
+        //when
         List<Product> allProducts = service.getAllProducts();
-        // THEN
+        //then
         assertThat(allProducts.size(), is(7));
     }
 
     @Test
     public void getProductById_shouldReturnTheCorrectObject(){
-        // GIVEN
+        //given
         Long productId = 1l;
-        // WHEN
+        //when
         Product product = service.getProductById(productId);
-        // THEN
+        //then
         assertThat(product.getId(), is(productId));
         assertThat(product.getName(),is("Cement bag 50kg"));
     }
 
     @Test(expected = ProductNotFoundException.class)
     public void getProductById_shouldThrowProductNotFoundExceptionIfNotFound(){
-        // GIVEN
+        //given
         Long productId = 14l;
-        // WHEN
+        //when
         Product product = service.getProductById(productId);
-        // THEN
+        //then
         //expect exception
+    }
+
+    @Test
+    public void createProduct_shouldReturnAnObjectProduct(){
+        //when
+        Object tested = service.createProduct("test", 1.0, 1.0);
+        //then
+        assertThat(tested, is(instanceOf(Product.class)));
+    }
+
+    @Test
+    public void createProduct_shouldCreateAProductWithAnID(){
+        //when
+        Product tested = service.createProduct("test", 1.0, 1.0);
+        //then
+        assertThat(tested.getId(), not(nullValue()));
+    }
+
+    @Test
+    public void createProduct_shouldReturnAProductWithCorrectValues(){
+        //given
+        String name = "name To Be Tested";
+        Double price = 23.75;
+        Double weight = 5.234234;
+        //when
+        Product tested = service.createProduct(name, price, weight);
+        //then
+        assertThat(tested.getName(), is(name.toString()));
+        assertThat(tested.getPrice(), is(price.doubleValue()));
+        assertThat(tested.getWeight(), is(weight.doubleValue()));
+    }
+
+    @Test
+    public void createProduct_shouldInsert1NewProductInDB(){
+        //given
+        int howManyProducts = service.getAllProducts().size();
+        //when
+        service.createProduct("test", 1.0, 1.0);
+        //then
+        assertThat(service.getAllProducts().size(), is(howManyProducts+1));
     }
 
 }

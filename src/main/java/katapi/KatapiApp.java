@@ -31,10 +31,10 @@ public class KatapiApp implements CommandLineRunner {
         jdbc.execute("DROP TABLE IF EXISTS orders");
         jdbc.execute("DROP TABLE IF EXISTS orders_content");
 
-        jdbc.execute("CREATE TABLE product(id INTEGER PRIMARY KEY, name VARCHAR, price NUMERIC, weight NUMERIC)");
-        jdbc.execute("CREATE TABLE bill(id INTEGER PRIMARY KEY, order_id INTEGER, amount NUMERIC, creation_date VARCHAR)");
-        jdbc.execute("CREATE TABLE orders(id INTEGER PRIMARY KEY, status VARCHAR, shipment_amount NUMERIC, total_price NUMERIC)");
-        jdbc.execute("CREATE TABLE orders_content(order_id INTEGER, product_id INTEGER)");
+        jdbc.execute("CREATE TABLE product(id INTEGER PRIMARY KEY AUTO_INCREMENT, name VARCHAR, price NUMERIC, weight NUMERIC)");
+        jdbc.execute("CREATE TABLE bill(id INTEGER PRIMARY KEY AUTO_INCREMENT, order_id INTEGER, amount NUMERIC, creation_date VARCHAR)");
+        jdbc.execute("CREATE TABLE orders(id INTEGER PRIMARY KEY AUTO_INCREMENT, status VARCHAR, shipment_amount NUMERIC, total_price NUMERIC)");
+        jdbc.execute("CREATE TABLE orders_content(order_id INTEGER AUTO_INCREMENT, product_id INTEGER)");
 
         log.info("Populating products");
         jdbc.batchUpdate("INSERT INTO product (id, name, price, weight) values (1, 'Cement bag 50kg', 25.0, 50.0)");

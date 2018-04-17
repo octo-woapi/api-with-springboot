@@ -31,4 +31,11 @@ public class ProductServiceImpl implements ProductService{
         return result;
     }
 
+    @Override
+    public Product createProduct(String name, Double price, Double weight) {
+        Product product = new Product(null, name, price, weight);
+        Long generatedId = productDao.insertProductAndReturnGeneratedID(product);
+        product.setId(generatedId);
+        return product;
+    }
 }
