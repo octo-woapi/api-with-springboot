@@ -75,6 +75,7 @@ public class ProductControllerTest {
     }
 
     @Test
+    @DirtiesContext(methodMode = DirtiesContext.MethodMode.BEFORE_METHOD)
     public void listAllProducts_shouldReturnAllProductsInDB() throws Exception {
         mockMvc.perform(get("/products")
                 .accept(MediaTypes.HAL_JSON)
