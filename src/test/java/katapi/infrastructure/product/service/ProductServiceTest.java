@@ -95,4 +95,43 @@ public class ProductServiceTest {
         assertThat(service.getAllProducts().size(), is(howManyProducts+1));
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void createProduct_shouldThrowAnIllegalArgumentExceptionIfNameMissing(){
+        //when
+        service.createProduct(null, 1.0, 1.0);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void createProduct_shouldThrowAnIllegalArgumentExceptionIfPriceMissing(){
+        //when
+        service.createProduct("tested", null, 1.0);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void createProduct_shouldThrowAnIllegalArgumentExceptionIfWeightMissing(){
+        //when
+        service.createProduct("tested", 1.0, null);
+    }
+
+    @Test
+    @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
+    public void deleteProduct_shouldDeleteOneProductInDB(){
+        //given
+        int howManyProducts = service.getAllProducts().size();
+        Long idToBeDeleted = 3l;
+        //when
+        service.deleteProductFromItsID(idToBeDeleted);
+        //then
+        assertThat(service.getAllProducts().size(), is(howManyProducts-1));
+    }
+
+    @Test(expected = ProductNotFoundException.class)
+    public void deleteProduct_shouldThrowProductNotFoundIfProductNotExists(){
+        //given
+        Long idToBeDeleted = 334l;
+        //when
+        service.deleteProductFromItsID(idToBeDeleted);
+        //then exception
+    }
+
 }

@@ -44,4 +44,8 @@ public class ProductDao {
 
         return keyHolder.getKey().longValue();
     }
+
+    public int deleteProductFromItsID(Long id) {
+        return jdbc.update("DELETE FROM Product WHERE id = ?", new Object[] {id});
+    }
 }

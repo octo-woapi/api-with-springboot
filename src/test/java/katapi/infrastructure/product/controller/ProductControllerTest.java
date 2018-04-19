@@ -1,6 +1,7 @@
 package katapi.infrastructure.product.controller;
 
 import katapi.KatapiApp;
+import katapi.domain.product.Product;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -12,12 +13,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.mock.http.MockHttpOutputMessage;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
+import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 
@@ -32,6 +36,7 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.*;
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = KatapiApp.class)
 @WebAppConfiguration
+@EnableWebMvc
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
 public class ProductControllerTest {
 
@@ -114,4 +119,47 @@ public class ProductControllerTest {
         ;
     }
 
+    @Test
+    public void createProduct_shouldReturnAProductWithID() throws Exception {
+        String name = "tested";
+        Double price = 10.10;
+        Double weight = 12.34;
+        String productJson = json(new Product(null, name, price, weight));
+        mockMvc.perform(post("/products")
+                .contentType(jsonType)
+                .content(productJson))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.product.name", is(name)))
+                .andExpect(jsonPath("$.product.price", is(price)))
+                .andExpect(jsonPath("$.product.weight", is(weight)))
+                .andExpect(jsonPath("$.product.id", is(notNullValue())))
+        ;
+    }
+
+    @Test
+    public void createProduct_shouldReturn400IfNameIsMissing() throws Exception{
+        Double price = 10.10;
+        Double weight = 12.34;
+        String productJson = json(new Product(null, null, price, weight));
+        mockMvc.perform(post("/products")
+                .contentType(jsonType)
+                .content(productJson))
+                .andExpect(status().is4xxClientError())
+                .andExpect(content().string(containsString("Param 'name' is required")))
+        ;
+    }
+
+
+    public void createProduct_shouldReturn201() throws Exception {
+        mockMvc.perform(post("/products"));
+    }
+
+
+
+    protected String json(Object o) throws IOException {
+        MockHttpOutputMessage mockHttpOutputMessage = new MockHttpOutputMessage();
+        this.mappingJackson2HttpMessageConverter.write(
+                o, MediaType.APPLICATION_JSON, mockHttpOutputMessage);
+        return mockHttpOutputMessage.getBodyAsString();
+    }
 }

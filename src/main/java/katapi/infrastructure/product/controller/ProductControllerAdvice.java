@@ -7,14 +7,22 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
-@ControllerAdvice
-public class ProductControllerAdvice {
+@ControllerAdvice(assignableTypes = ProductController.class)
+public class ProductControllerAdvice extends ResponseEntityExceptionHandler{
 
     @ResponseBody
     @ExceptionHandler(ProductNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    VndErrors userNotFoundExceptionHandler(ProductNotFoundException ex) {
+    VndErrors productNotFoundExceptionHandler(ProductNotFoundException ex) {
+        return new VndErrors("error", ex.getMessage());
+    }
+
+    @ResponseBody
+    @ExceptionHandler(IllegalArgumentException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    VndErrors illegalArgumentExceptionHandler(IllegalArgumentException ex) {
         return new VndErrors("error", ex.getMessage());
     }
 }
