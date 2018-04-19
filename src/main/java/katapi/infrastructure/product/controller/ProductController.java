@@ -6,16 +6,19 @@ import katapi.infrastructure.product.service.ProductService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.Resources;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
+import java.net.URI;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -39,15 +42,23 @@ public class ProductController {
         return new Resources<>(productList);
     }
 
-    @GetMapping("/{productId}")
+    @GetMapping(value = "/{productId}", produces = {MediaType.APPLICATION_JSON_VALUE, "application/hal+json"})
     public ProductResource getProductById(@PathVariable Long productId){
         return new ProductResource(productService.getProductById(productId));
     }
 
-    @PostMapping("")
+    @PostMapping(value = "", produces = {MediaType.APPLICATION_JSON_VALUE, "application/hal+json"})
     @ResponseStatus(HttpStatus.CREATED)
-    public ProductResource createProduct(@RequestBody Product product){
-        return new ProductResource(productService.createProduct(product.getName(), product.getPrice(), product.getWeight()));
+    public ResponseEntity<?> createProduct(@RequestBody Product product){
+        Product createdProduct = productService.createProduct(product.getName(), product.getPrice(), product.getWeight());
+        Link linkToThisProduct = new ProductResource(createdProduct).getLink("self");
+        return ResponseEntity.created(URI.create(linkToThisProduct.getHref())).body(createdProduct);
+    }
+
+    @DeleteMapping("/{productId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteProductById(@PathVariable Long productId){
+        productService.deleteProductFromItsID(productId);
     }
 
 }

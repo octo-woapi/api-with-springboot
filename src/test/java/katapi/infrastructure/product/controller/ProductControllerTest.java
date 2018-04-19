@@ -3,6 +3,7 @@ package katapi.infrastructure.product.controller;
 import katapi.KatapiApp;
 import katapi.domain.product.Product;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,8 +28,10 @@ import java.util.Arrays;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertNotNull;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.*;
 
@@ -125,14 +128,15 @@ public class ProductControllerTest {
         Double price = 10.10;
         Double weight = 12.34;
         String productJson = json(new Product(null, name, price, weight));
-        mockMvc.perform(post("/products")
+        mockMvc.perform(post("/products").accept(MediaTypes.HAL_JSON_VALUE)
                 .contentType(jsonType)
                 .content(productJson))
+                .andDo(print())
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.product.name", is(name)))
-                .andExpect(jsonPath("$.product.price", is(price)))
-                .andExpect(jsonPath("$.product.weight", is(weight)))
-                .andExpect(jsonPath("$.product.id", is(notNullValue())))
+                .andExpect(jsonPath("$.name", is(name)))
+                .andExpect(jsonPath("$.price", is(price)))
+                .andExpect(jsonPath("$.weight", is(weight)))
+                .andExpect(jsonPath("$.id", is(notNullValue())))
         ;
     }
 
@@ -149,9 +153,47 @@ public class ProductControllerTest {
         ;
     }
 
+    @Test
+    public void createProduct_shouldReturn400IfPriceIsMissing() throws Exception{
+        Double price = 10.10;
+        Double weight = 12.34;
+        String productJson = json(new Product(null, "tested", null, weight));
+        mockMvc.perform(post("/products")
+                .contentType(jsonType)
+                .content(productJson))
+                .andExpect(status().is4xxClientError())
+                .andExpect(content().string(containsString("Param 'price' is required")))
+        ;
+    }
 
-    public void createProduct_shouldReturn201() throws Exception {
-        mockMvc.perform(post("/products"));
+    @Test
+    public void createProduct_shouldReturn400IfWeightIsMissing() throws Exception{
+        Double price = 10.10;
+        Double weight = 12.34;
+        String productJson = json(new Product(null, "tested", price, null));
+        mockMvc.perform(post("/products")
+                .contentType(jsonType)
+                .content(productJson))
+                .andExpect(status().is4xxClientError())
+                .andExpect(content().string(containsString("Param 'weight' is required")))
+        ;
+    }
+
+    @Test
+    @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
+    public void deleteProduct_shouldReturn204() throws Exception {
+        int idToBeTested = 2;
+        mockMvc.perform(delete("/products/"+idToBeTested))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    public void deleteProduct_shouldReturn404IfProductNotFound() throws Exception{
+        int idToBeTested = 5555;
+        mockMvc.perform(delete("/products/"+idToBeTested))
+                .andExpect(status().isNotFound())
+                .andExpect(content().string(containsString("could not find product with id : "+idToBeTested)))
+                ;
     }
 
 

@@ -51,6 +51,7 @@ public class ProductServiceImpl implements ProductService{
         if(nbRowsDeleted == 0){ throw new ProductNotFoundException(id); }
     }
 
+
     private void validateProductParams(String name, Double price, Double weight){
         if(name == null) throw new IllegalArgumentException("Param 'name' is required");
         if(price == null) throw new IllegalArgumentException("Param 'price' is required");
