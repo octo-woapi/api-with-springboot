@@ -40,7 +40,7 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.*;
 @SpringBootTest(classes = KatapiApp.class)
 @WebAppConfiguration
 @EnableWebMvc
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class ProductControllerTest {
 
     /* ***************************************************************************************************************
@@ -83,27 +83,99 @@ public class ProductControllerTest {
     }
 
     @Test
-    @DirtiesContext(methodMode = DirtiesContext.MethodMode.BEFORE_METHOD)
     public void listAllProducts_shouldReturnAllProductsInDB() throws Exception {
+        mockMvc.perform(get("/products")
+                .accept(jsonType)
+                .contentType(jsonType))
+                .andExpect(status().isOk())
+                .andDo(print())
+                .andExpect(header().string(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON + ";charset=UTF-8"))
+                .andExpect(content().contentType(jsonType))
+                .andExpect(jsonPath("$", hasSize(7)))
+        ;
+    }
+
+    @Test
+    public void listAllProductsHypermedia_shouldReturnAllProductsInDBInHypermedia() throws Exception {
         mockMvc.perform(get("/products")
                 .accept(MediaTypes.HAL_JSON)
                 .contentType(MediaTypes.HAL_JSON))
                 .andExpect(status().isOk())
+                .andDo(print())
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, MediaTypes.HAL_JSON_VALUE + ";charset=UTF-8"))
                 .andExpect(content().contentType(halJsonType))
-                .andExpect(jsonPath("$.content", hasSize(7)))
-                ;
+                .andExpect(jsonPath("$._embedded.productResources", hasSize(7)))
+        ;
+    }
+
+    @Test
+    public void listAllProducts_shouldSortByNameIfParamSortName() throws Exception{
+        mockMvc.perform(get("/products/?sort=name")
+                .accept(jsonType))
+                .andExpect(status().isOk())
+                .andDo(print())
+                .andExpect(content().contentType(jsonType))
+                .andExpect(jsonPath("$.[0].name", is("Cement bag 25kg")))
+                .andExpect(jsonPath("$.[1].name", is("Cement bag 50kg")))
+                .andExpect(jsonPath("$.[6].name", is("Red bricks small pallet 250 units")))
+        ;
+    }
+
+    @Test
+    public void listAllProducts_shouldSortByWeightIfParamSortWeight() throws Exception{
+        mockMvc.perform(get("/products/?sort=weight")
+                .accept(jsonType))
+                .andExpect(status().isOk())
+                .andDo(print())
+                .andExpect(content().contentType(jsonType))
+                .andExpect(jsonPath("$.[0].weight", is(0.8)))
+                .andExpect(jsonPath("$.[1].weight", is(19.0)))
+                .andExpect(jsonPath("$.[6].weight", is(855.0)))
+        ;
+    }
+
+    @Test
+    public void listAllProducts_shouldSortByPriceIfParamSortPrice() throws Exception{
+        mockMvc.perform(get("/products/?sort=price")
+                .accept(jsonType))
+                .andExpect(status().isOk())
+                .andDo(print())
+                .andExpect(content().contentType(jsonType))
+                .andExpect(jsonPath("$.[0].price", is(0.50)))
+                .andExpect(jsonPath("$.[1].price", is(1.50)))
+                .andExpect(jsonPath("$.[6].price", is(149.99)))
+        ;
+    }
+
+    @Test
+    public void listAllProducts_shouldTIgnoreWrongSearchParam() throws Exception{
+        mockMvc.perform(get("/products/?sort=zezefzefzefzf")
+                .accept(jsonType))
+                .andExpect(status().isOk())
+                .andDo(print())
+                .andExpect(content().contentType(jsonType))
+                .andExpect(jsonPath("$", hasSize(7)));
+    }
+
+    @Test
+    public void listAllProducts_shouldIgnoreEmptySearchParam() throws Exception{
+        mockMvc.perform(get("/products/?sort=")
+                .accept(jsonType))
+                .andExpect(status().isOk())
+                .andDo(print())
+                .andExpect(content().contentType(jsonType))
+                .andExpect(jsonPath("$", hasSize(7)));
     }
 
     @Test
     public void getProductById_shouldReturnTheCorrectProduct() throws Exception {
         int idToBeTested = 1;
         mockMvc.perform(get("/products/"+idToBeTested)
-                .accept(MediaTypes.HAL_JSON)
-                .contentType(MediaTypes.HAL_JSON))
+                .accept(jsonType)
+                .contentType(jsonType))
                 .andExpect(status().isOk())
-                .andExpect(header().string(HttpHeaders.CONTENT_TYPE, MediaTypes.HAL_JSON_VALUE + ";charset=UTF-8"))
-                .andExpect(content().contentType(halJsonType))
+                .andExpect(header().string(HttpHeaders.CONTENT_TYPE, "application/json" + ";charset=UTF-8"))
+                .andExpect(content().contentType(jsonType))
                 .andExpect(jsonPath("$.product.id", is(idToBeTested)))
                 ;
     }
@@ -112,12 +184,12 @@ public class ProductControllerTest {
     public void getProductById_shouldReturn404ifNotFound() throws Exception {
         int idToBeTested = 999;
         mockMvc.perform(get("/products/"+idToBeTested)
-                .accept(MediaTypes.HAL_JSON)
-                .contentType(MediaTypes.HAL_JSON))
+                .accept(jsonType)
+                .contentType(jsonType))
                 .andExpect(status().is4xxClientError())
                 .andExpect(status().is(HttpStatus.NOT_FOUND.value()))
-                .andExpect(header().string(HttpHeaders.CONTENT_TYPE, MediaTypes.HAL_JSON_VALUE + ";charset=UTF-8"))
-                .andExpect(content().contentType(halJsonType))
+                .andExpect(header().string(HttpHeaders.CONTENT_TYPE, "application/json" + ";charset=UTF-8"))
+                .andExpect(content().contentType(jsonType))
                 .andExpect(content().string(containsString("could not find product with id : "+idToBeTested)))
         ;
     }
@@ -128,7 +200,8 @@ public class ProductControllerTest {
         Double price = 10.10;
         Double weight = 12.34;
         String productJson = json(new Product(null, name, price, weight));
-        mockMvc.perform(post("/products").accept(MediaTypes.HAL_JSON_VALUE)
+        mockMvc.perform(post("/products")
+                .accept(jsonType)
                 .contentType(jsonType)
                 .content(productJson))
                 .andDo(print())
@@ -180,7 +253,6 @@ public class ProductControllerTest {
     }
 
     @Test
-    @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
     public void deleteProduct_shouldReturn204() throws Exception {
         int idToBeTested = 2;
         mockMvc.perform(delete("/products/"+idToBeTested))

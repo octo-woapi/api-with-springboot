@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 @ControllerAdvice(assignableTypes = ProductController.class)
@@ -23,6 +24,20 @@ public class ProductControllerAdvice extends ResponseEntityExceptionHandler{
     @ExceptionHandler(IllegalArgumentException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     VndErrors illegalArgumentExceptionHandler(IllegalArgumentException ex) {
+        return new VndErrors("error", ex.getMessage());
+    }
+
+    @ResponseBody
+    @ExceptionHandler(HttpClientErrorException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    VndErrors httpClientErrorExceptionHandler(HttpClientErrorException ex){
+        return new VndErrors("error", ex.getMessage());
+    }
+
+    @ResponseBody
+    @ExceptionHandler(Exception.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    VndErrors exceptionHandler(Exception ex){
         return new VndErrors("error", ex.getMessage());
     }
 }
