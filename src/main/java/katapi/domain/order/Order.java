@@ -4,6 +4,7 @@ import katapi.domain.product.Product;
 import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -20,12 +21,12 @@ public class Order {
 
 
     public BigDecimal getTotalAmount() {
-        if(CollectionUtils.isEmpty(productList)){return new BigDecimal("0.0");}
+        if(CollectionUtils.isEmpty(productList)){return new BigDecimal("0.00");}
 
-        BigDecimal total = productList.stream().map(product -> product.getPrice()).reduce(BigDecimal.ZERO, BigDecimal::add);
-        //BigDecimal total = new BigDecimal (productList.stream().mapToDouble(p -> p.getPrice().doubleValue()).sum());
+        BigDecimal total = productList.stream().map(product -> product.getPrice()).reduce(BigDecimal.ZERO, BigDecimal::add).setScale(2, BigDecimal.ROUND_HALF_UP);
+
         if(total.compareTo(new BigDecimal("1000")) > 0){
-            return new BigDecimal("950.95");
+            return total.subtract(total.multiply(new BigDecimal("0.05"))).setScale(2, BigDecimal.ROUND_HALF_UP);
         }else {
             return total;
         }

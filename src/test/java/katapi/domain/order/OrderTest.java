@@ -1,19 +1,24 @@
 package katapi.domain.order;
 
 import katapi.domain.product.Product;
-import katapi.infrastructure.product.rest.ProductResource;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertThat;
 
 public class OrderTest {
+
+    private static final Logger log = LoggerFactory.getLogger(OrderTest.class);
+
 
     @Test
     public void addProduct_shouldCreateNewProductListIfItsNull(){
@@ -55,6 +60,45 @@ public class OrderTest {
     }
 
     @Test
+    public void orderTotalAmount_shouldHave5PercentDiscountWhenTotalPriceExceed1000ForAnyData(){
+        //given
+        Order tested = new Order();
+        Product testProduct1 = new Product();
+        BigDecimal randomPrice = BigDecimal.valueOf(ThreadLocalRandom.current().nextDouble(500.0, 1000.0)).setScale(4, RoundingMode.HALF_UP);
+        testProduct1.setPrice(randomPrice);
+        BigDecimal randomPrice2 = BigDecimal.valueOf(ThreadLocalRandom.current().nextDouble(500.0, 1000.0)).setScale(4, RoundingMode.HALF_UP);
+        Product testProduct2 = new Product();
+        testProduct2.setPrice(randomPrice2);
+
+        tested.addProduct(testProduct1);
+        tested.addProduct(testProduct2);
+        //when
+        BigDecimal totalAmount = tested.getTotalAmount();
+        BigDecimal totalTested = randomPrice.add(randomPrice2);
+        BigDecimal totalWithDiscount = totalTested.subtract(totalTested.multiply(new BigDecimal("0.05"))).setScale(2, BigDecimal.ROUND_HALF_UP);
+        //then
+        assertThat(totalAmount, is(totalWithDiscount));
+    }
+
+    //Totally arbitrary to have 2 digits in the decimal part
+    @Test
+    public void orderTotalAmount_shouldHaveAMaximumOf2DigitDecimal(){
+        //given
+        Order tested = new Order();
+        Product testProduct1 = new Product();
+        testProduct1.setPrice(new BigDecimal("1.002084823747"));
+        Product testProduct2 = new Product();
+        testProduct2.setPrice(new BigDecimal("1.120000000345"));
+
+        tested.addProduct(testProduct1);
+        tested.addProduct(testProduct2);
+        //when
+        BigDecimal totalAmount = tested.getTotalAmount();
+        //then
+        assertThat(totalAmount, is(new BigDecimal("2.12")));
+    }
+
+    @Test
     public void orderTotalAmount_shouldHaveNoDiscountUnder1000Credits(){
         //given
         Order tested = new Order();
@@ -68,11 +112,11 @@ public class OrderTest {
         //when
         BigDecimal totalAmount = tested.getTotalAmount();
         //then
-        assertThat(totalAmount, is(new BigDecimal("551.0")));
+        assertThat(totalAmount, is(new BigDecimal("551.00")));
     }
 
     @Test
-    public void orderTotalAmount_shouldBeTheExactAdditionOfProductPrice(){
+    public void orderTotalAmount_shouldBeTheAdditionOfProductPriceRoundedFor2digits(){
         //given
         Order tested = new Order();
         Product testProduct1 = new Product();
@@ -88,7 +132,7 @@ public class OrderTest {
         //when
         BigDecimal totalAmount = tested.getTotalAmount();
         //then
-        assertThat(totalAmount, is(new BigDecimal("119.027")));
+        assertThat(totalAmount, is(new BigDecimal("119.03")));
     }
 
     @Test
@@ -98,7 +142,9 @@ public class OrderTest {
         //when
         BigDecimal totalAmount = tested.getTotalAmount();
         //then
-        assertThat(totalAmount, is(new BigDecimal("0.0")));
+        assertThat(totalAmount, is(new BigDecimal("0.00")));
     }
+
+    
 
 }
