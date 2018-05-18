@@ -11,6 +11,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import static org.hamcrest.CoreMatchers.*;
@@ -58,7 +59,7 @@ public class ProductServiceTest {
     @Test
     public void createProduct_shouldReturnAnObjectProduct(){
         //when
-        Object tested = service.createProduct("test", 1.0, 1.0);
+        Object tested = service.createProduct("test", BigDecimal.valueOf(1.0), BigDecimal.valueOf(1.0));
         //then
         assertThat(tested, is(instanceOf(Product.class)));
     }
@@ -66,7 +67,7 @@ public class ProductServiceTest {
     @Test
     public void createProduct_shouldCreateAProductWithAnID(){
         //when
-        Product tested = service.createProduct("test", 1.0, 1.0);
+        Product tested = service.createProduct("test", BigDecimal.valueOf(1.0), BigDecimal.valueOf(1.0));
         //then
         assertThat(tested.getId(), not(nullValue()));
     }
@@ -75,14 +76,14 @@ public class ProductServiceTest {
     public void createProduct_shouldReturnAProductWithCorrectValues(){
         //given
         String name = "name To Be Tested";
-        Double price = 23.75;
-        Double weight = 5.234234;
+        BigDecimal price = BigDecimal.valueOf(23.75);
+        BigDecimal weight = BigDecimal.valueOf(5.234234);
         //when
         Product tested = service.createProduct(name, price, weight);
         //then
         assertThat(tested.getName(), is(name.toString()));
-        assertThat(tested.getPrice(), is(price.doubleValue()));
-        assertThat(tested.getWeight(), is(weight.doubleValue()));
+        assertThat(tested.getPrice().doubleValue(), is(price.doubleValue()));
+        assertThat(tested.getWeight().doubleValue(), is(weight.doubleValue()));
     }
 
     @Test
@@ -90,7 +91,7 @@ public class ProductServiceTest {
         //given
         int howManyProducts = service.getAllProducts().size();
         //when
-        service.createProduct("test", 1.0, 1.0);
+        service.createProduct("test", BigDecimal.valueOf(1.0), BigDecimal.valueOf(1.0));
         //then
         assertThat(service.getAllProducts().size(), is(howManyProducts+1));
     }
@@ -98,19 +99,19 @@ public class ProductServiceTest {
     @Test(expected = IllegalArgumentException.class)
     public void createProduct_shouldThrowAnIllegalArgumentExceptionIfNameMissing(){
         //when
-        service.createProduct(null, 1.0, 1.0);
+        service.createProduct(null, BigDecimal.valueOf(1.0), BigDecimal.valueOf(1.0));
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void createProduct_shouldThrowAnIllegalArgumentExceptionIfPriceMissing(){
         //when
-        service.createProduct("tested", null, 1.0);
+        service.createProduct("tested", null, BigDecimal.valueOf(1.0));
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void createProduct_shouldThrowAnIllegalArgumentExceptionIfWeightMissing(){
         //when
-        service.createProduct("tested", 1.0, null);
+        service.createProduct("tested", BigDecimal.valueOf(1.0), null);
     }
 
     @Test

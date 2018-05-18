@@ -37,8 +37,8 @@ public class ProductDao {
                     "INSERT INTO Product (name, price, weight) VALUES (?, ?, ?)",
                     new String[]{"id"});
             ps.setString(1, product.getName());
-            ps.setDouble(2, product.getPrice());
-            ps.setDouble(3, product.getWeight());
+            ps.setDouble(2, product.getPrice().doubleValue());
+            ps.setDouble(3, product.getWeight().doubleValue());
             return ps;
         }, keyHolder);
 

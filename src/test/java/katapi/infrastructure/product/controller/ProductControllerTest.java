@@ -3,7 +3,6 @@ package katapi.infrastructure.product.controller;
 import katapi.KatapiApp;
 import katapi.domain.product.Product;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +22,7 @@ import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 
@@ -197,8 +197,8 @@ public class ProductControllerTest {
     @Test
     public void createProduct_shouldReturnAProductWithID() throws Exception {
         String name = "tested";
-        Double price = 10.10;
-        Double weight = 12.34;
+        BigDecimal price = BigDecimal.valueOf(10.10);
+        BigDecimal weight = BigDecimal.valueOf(12.34);
         String productJson = json(new Product(null, name, price, weight));
         mockMvc.perform(post("/products")
                 .accept(jsonType)
@@ -207,16 +207,16 @@ public class ProductControllerTest {
                 .andDo(print())
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.name", is(name)))
-                .andExpect(jsonPath("$.price", is(price)))
-                .andExpect(jsonPath("$.weight", is(weight)))
+                .andExpect(jsonPath("$.price", is(price.doubleValue())))
+                .andExpect(jsonPath("$.weight", is(weight.doubleValue())))
                 .andExpect(jsonPath("$.id", is(notNullValue())))
         ;
     }
 
     @Test
     public void createProduct_shouldReturn400IfNameIsMissing() throws Exception{
-        Double price = 10.10;
-        Double weight = 12.34;
+        BigDecimal price = BigDecimal.valueOf(10.10);
+        BigDecimal weight = BigDecimal.valueOf(12.34);
         String productJson = json(new Product(null, null, price, weight));
         mockMvc.perform(post("/products")
                 .contentType(jsonType)
@@ -228,8 +228,8 @@ public class ProductControllerTest {
 
     @Test
     public void createProduct_shouldReturn400IfPriceIsMissing() throws Exception{
-        Double price = 10.10;
-        Double weight = 12.34;
+        BigDecimal price = BigDecimal.valueOf(10.10);
+        BigDecimal weight = BigDecimal.valueOf(12.34);
         String productJson = json(new Product(null, "tested", null, weight));
         mockMvc.perform(post("/products")
                 .contentType(jsonType)
@@ -241,8 +241,8 @@ public class ProductControllerTest {
 
     @Test
     public void createProduct_shouldReturn400IfWeightIsMissing() throws Exception{
-        Double price = 10.10;
-        Double weight = 12.34;
+        BigDecimal price = BigDecimal.valueOf(10.10);
+        BigDecimal weight = BigDecimal.valueOf(12.34);
         String productJson = json(new Product(null, "tested", price, null));
         mockMvc.perform(post("/products")
                 .contentType(jsonType)
@@ -268,7 +268,9 @@ public class ProductControllerTest {
                 ;
     }
 
-
+    /* ****************************************************************************************************************
+                                                    PRIVATE METHODS
+    **************************************************************************************************************** */
 
     protected String json(Object o) throws IOException {
         MockHttpOutputMessage mockHttpOutputMessage = new MockHttpOutputMessage();

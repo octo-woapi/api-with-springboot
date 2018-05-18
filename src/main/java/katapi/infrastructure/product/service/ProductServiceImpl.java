@@ -1,7 +1,6 @@
 package katapi.infrastructure.product.service;
 
 import katapi.domain.product.Product;
-import katapi.infrastructure.product.controller.ProductController;
 import katapi.infrastructure.product.exception.ProductNotFoundException;
 import katapi.infrastructure.product.persistence.ProductDao;
 import org.slf4j.Logger;
@@ -10,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Component
@@ -35,7 +35,7 @@ public class ProductServiceImpl implements ProductService{
     }
 
     @Override
-    public Product createProduct(String name, Double price, Double weight){
+    public Product createProduct(String name, BigDecimal price, BigDecimal weight){
         validateProductParams(name, price, weight);
         Product product = new Product(null, name, price, weight);
         Long generatedId = productDao.insertProductAndReturnGeneratedID(product);
@@ -50,7 +50,7 @@ public class ProductServiceImpl implements ProductService{
     }
 
 
-    private void validateProductParams(String name, Double price, Double weight){
+    private void validateProductParams(String name, BigDecimal price, BigDecimal weight){
         if(name == null) throw new IllegalArgumentException("Param 'name' is required");
         if(price == null) throw new IllegalArgumentException("Param 'price' is required");
         if(weight == null) throw new IllegalArgumentException("Param 'weight' is required");

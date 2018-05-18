@@ -1,16 +1,18 @@
 package katapi.domain.product;
 
+import java.math.BigDecimal;
+
 public class Product {
 
     private Long id;
     private String name;
-    private Double price;
-    private Double weight;
+    private BigDecimal price;
+    private BigDecimal weight;
 
     public Product() {
     }
 
-    public Product(Long id, String name, Double price, Double weight) {
+    public Product(Long id, String name, BigDecimal price, BigDecimal weight) {
         this.id = id;
         this.name = name;
         this.price = price;
@@ -33,19 +35,19 @@ public class Product {
         this.name = name;
     }
 
-    public Double getPrice() {
+    public BigDecimal getPrice() {
         return price;
     }
 
-    public void setPrice(Double price) {
+    public void setPrice(BigDecimal price) {
         this.price = price;
     }
 
-    public Double getWeight() {
+    public BigDecimal getWeight() {
         return weight;
     }
 
-    public void setWeight(Double weight) {
+    public void setWeight(BigDecimal weight) {
         this.weight = weight;
     }
 
