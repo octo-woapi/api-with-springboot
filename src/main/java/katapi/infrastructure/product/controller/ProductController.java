@@ -16,8 +16,11 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.constraints.NotNull;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @RestController
@@ -70,28 +73,60 @@ public class ProductController {
                                                     PRIVATE METHODS
     **************************************************************************************************************** */
 
-    //TODO : refactor
     private List<Product> getSortedProductList(@NotNull String sortParam) {
-        if(sortParam.equals("name")) {
+        if(ProductAttribute.contains(sortParam)) {
             return productService.getAllProducts()
                     .stream()
-                    .sorted(Comparator.comparing(Product::getName))
+                    .sorted(chooseAttributeToCompare(sortParam))
                     .collect(Collectors.toList());
-        } else if(sortParam.equals("price")){
-            return productService.getAllProducts()
-                    .stream()
-                    .sorted(Comparator.comparing(Product::getPrice))
-                    .collect(Collectors.toList());
-        }
-        else if(sortParam.equals("weight")){
-            return productService.getAllProducts()
-                    .stream()
-                    .sorted(Comparator.comparing(Product::getWeight))
-                    .collect(Collectors.toList());
-        }
-        else {
+        }else{
             return productService.getAllProducts();
         }
+
     }
+
+    private Comparator<Product> chooseAttributeToCompare(@NotNull String sortParam){
+        for (ProductAttribute attribute : ProductAttribute.values()) {
+            if (attribute.getAttributeLowerCase().equals(sortParam)) {
+                return attribute.getComparator();
+            }
+        }
+        return null;
+    }
+
+
+    private enum ProductAttribute{
+        NAME("name", Comparator.comparing(Product::getName)),
+        PRICE("price", Comparator.comparing(Product::getPrice)),
+        WEIGHT("weight", Comparator.comparing(Product::getWeight));
+
+        private String attributeLowerCase;
+        private Comparator<Product> comparator;
+
+        ProductAttribute(String attributeLowerCase, Comparator<Product> comparator){
+            this.attributeLowerCase = attributeLowerCase;
+            this.comparator = comparator;
+        }
+
+        public String getAttributeLowerCase(){
+            return attributeLowerCase;
+        }
+
+        public Comparator<Product> getComparator() {
+            return comparator;
+        }
+
+        public static boolean contains(String value) {
+
+            for (ProductAttribute attribute : ProductAttribute.values()) {
+                if (attribute.getAttributeLowerCase().equals(value)) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+    }
+
 
 }
