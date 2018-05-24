@@ -1,6 +1,7 @@
 package katapi.infrastructure.product.controller;
 
 import katapi.domain.product.Product;
+import katapi.domain.product.ProductSortAttributes;
 import katapi.infrastructure.product.rest.ProductResource;
 import katapi.infrastructure.product.service.ProductService;
 import org.h2.util.StringUtils;
@@ -18,6 +19,7 @@ import javax.validation.constraints.NotNull;
 import java.net.URI;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @RestController
@@ -71,10 +73,10 @@ public class ProductController {
     **************************************************************************************************************** */
 
     private List<Product> getSortedProductList(@NotNull String sortParam) {
-        if(ProductAttributes.contains(sortParam)) {
+        if(ProductSortAttributes.contains(sortParam)) {
             return productService.getAllProducts()
                     .stream()
-                    .sorted(chooseAttributeToCompare(sortParam))
+                    .sorted(Objects.requireNonNull(chooseAttributeToCompare(sortParam)))
                     .collect(Collectors.toList());
         }else{
             return productService.getAllProducts();
@@ -83,47 +85,12 @@ public class ProductController {
     }
 
     private Comparator<Product> chooseAttributeToCompare(@NotNull String sortParam){
-        for (ProductAttributes attribute : ProductAttributes.values()) {
+        for (ProductSortAttributes attribute : ProductSortAttributes.values()) {
             if (attribute.getAttributeLowerCase().equals(sortParam)) {
                 return attribute.getComparator();
             }
         }
         return null;
     }
-
-
-    private enum ProductAttributes {
-        NAME("name", Comparator.comparing(Product::getName)),
-        PRICE("price", Comparator.comparing(Product::getPrice)),
-        WEIGHT("weight", Comparator.comparing(Product::getWeight));
-
-        private String attributeLowerCase;
-        private Comparator<Product> comparator;
-
-        ProductAttributes(String attributeLowerCase, Comparator<Product> comparator){
-            this.attributeLowerCase = attributeLowerCase;
-            this.comparator = comparator;
-        }
-
-        public String getAttributeLowerCase(){
-            return attributeLowerCase;
-        }
-
-        public Comparator<Product> getComparator() {
-            return comparator;
-        }
-
-        public static boolean contains(String value) {
-
-            for (ProductAttributes attribute : ProductAttributes.values()) {
-                if (attribute.getAttributeLowerCase().equals(value)) {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-    }
-
 
 }
