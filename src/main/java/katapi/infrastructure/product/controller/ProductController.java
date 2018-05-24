@@ -16,11 +16,8 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.constraints.NotNull;
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Objects;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @RestController
@@ -74,7 +71,7 @@ public class ProductController {
     **************************************************************************************************************** */
 
     private List<Product> getSortedProductList(@NotNull String sortParam) {
-        if(ProductAttribute.contains(sortParam)) {
+        if(ProductAttributes.contains(sortParam)) {
             return productService.getAllProducts()
                     .stream()
                     .sorted(chooseAttributeToCompare(sortParam))
@@ -86,7 +83,7 @@ public class ProductController {
     }
 
     private Comparator<Product> chooseAttributeToCompare(@NotNull String sortParam){
-        for (ProductAttribute attribute : ProductAttribute.values()) {
+        for (ProductAttributes attribute : ProductAttributes.values()) {
             if (attribute.getAttributeLowerCase().equals(sortParam)) {
                 return attribute.getComparator();
             }
@@ -95,7 +92,7 @@ public class ProductController {
     }
 
 
-    private enum ProductAttribute{
+    private enum ProductAttributes {
         NAME("name", Comparator.comparing(Product::getName)),
         PRICE("price", Comparator.comparing(Product::getPrice)),
         WEIGHT("weight", Comparator.comparing(Product::getWeight));
@@ -103,7 +100,7 @@ public class ProductController {
         private String attributeLowerCase;
         private Comparator<Product> comparator;
 
-        ProductAttribute(String attributeLowerCase, Comparator<Product> comparator){
+        ProductAttributes(String attributeLowerCase, Comparator<Product> comparator){
             this.attributeLowerCase = attributeLowerCase;
             this.comparator = comparator;
         }
@@ -118,7 +115,7 @@ public class ProductController {
 
         public static boolean contains(String value) {
 
-            for (ProductAttribute attribute : ProductAttribute.values()) {
+            for (ProductAttributes attribute : ProductAttributes.values()) {
                 if (attribute.getAttributeLowerCase().equals(value)) {
                     return true;
                 }
