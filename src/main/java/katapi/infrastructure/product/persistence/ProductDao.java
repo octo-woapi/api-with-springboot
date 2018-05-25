@@ -13,30 +13,34 @@ import org.springframework.stereotype.Repository;
 
 import java.io.Serializable;
 import java.sql.PreparedStatement;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 
 @Repository
-public class ProductDao<T extends Product,ID extends Serializable> implements PagingAndSortingRepository<T,ID>  {
+public class ProductDao<T extends Product,ID extends Serializable> implements PagingAndSortingRepository<T,ID> {
 
     @Autowired
     JdbcTemplate jdbc;
 
+    private String query = "SELECT * FROM Product";
+
     public List<Product> getAllProducts() {
-        List<Product> result = jdbc.query("SELECT * FROM Product", new BeanPropertyRowMapper(Product.class));
+        List<Product> result = jdbc.query(this.query, new BeanPropertyRowMapper(Product.class));
         return result;
     }
 
-    public Product getProductById(Long id){
+    public Product getProductById(Long id) {
         Product result = (Product) jdbc.queryForObject(
                 "SELECT * FROM Product WHERE id = ?"
-                , new Object[] {id}
+                , new Object[]{id}
                 , new BeanPropertyRowMapper(Product.class));
         return result;
     }
 
-    public Long insertProductAndReturnGeneratedID(Product product){
+    public Long insertProductAndReturnGeneratedID(Product product) {
         GeneratedKeyHolder keyHolder = new GeneratedKeyHolder();
         jdbc.update(con -> {
             PreparedStatement ps = con.prepareStatement(
@@ -52,23 +56,40 @@ public class ProductDao<T extends Product,ID extends Serializable> implements Pa
     }
 
     public int deleteProductFromItsID(Long id) {
-        return jdbc.update("DELETE FROM Product WHERE id = ?", new Object[] {id});
+        return jdbc.update("DELETE FROM Product WHERE id = ?", new Object[]{id});
     }
 
     @Override
     public Iterable<T> findAll(Sort sort) {
-        String query = "SELECT * FROM Product";
+
+        String queryWithSort = this.query;
 
         for (Sort.Order o : sort) {
-            query += " ORDER BY " + o.getProperty() + " " + o.getDirection().toString() + " ";
+            queryWithSort += " ORDER BY " + o.getProperty() + " " + o.getDirection().toString() + " ";
         }
 
-        return jdbc.query(query, new BeanPropertyRowMapper(Product.class));
+        return jdbc.query(queryWithSort, new BeanPropertyRowMapper(Product.class));
     }
 
     @Override
     public Page<T> findAll(Pageable pageable) {
-        return null;
+        String queryPage = this.query;
+
+        for (Sort.Order o : pageable.getSort()) {
+            queryPage += " ORDER BY " + o.getProperty() + " " + o.getDirection().toString() + " ";
+        }
+
+        int pageSize = 10;
+
+        queryPage += " LIMIT " + pageable.getPageNumber() * pageSize + " " + pageSize + " ";
+
+
+        long count = count();
+
+        return new JdbcPage<T>(pageable,
+                (int) count / pageSize,
+                (int) count,
+                jdbc.query(queryPage, new BeanPropertyRowMapper(Product.class)));
     }
 
     @Override
@@ -124,5 +145,103 @@ public class ProductDao<T extends Product,ID extends Serializable> implements Pa
     @Override
     public void deleteAll() {
 
+    }
+
+
+    class JdbcPage<T> implements Page<T> {
+
+        Pageable pageable;
+        int totalPages;
+        int totalNumbers;
+        List<T> content;
+
+        public JdbcPage(Pageable pageable, int totalPages,
+                        int totalNumbers, List<T> content) {
+            super();
+            this.pageable = pageable;
+            this.totalPages = totalPages;
+            this.totalNumbers = totalNumbers;
+            this.content = content;
+        }
+
+        @Override
+        public int getTotalPages() {
+            return 0;
+        }
+
+        @Override
+        public long getTotalElements() {
+            return 0;
+        }
+
+        @Override
+        public int getNumber() {
+            return 0;
+        }
+
+        @Override
+        public int getSize() {
+            return 0;
+        }
+
+        @Override
+        public int getNumberOfElements() {
+            return 0;
+        }
+
+        @Override
+        public List<T> getContent() {
+            return null;
+        }
+
+        @Override
+        public boolean hasContent() {
+            return false;
+        }
+
+        @Override
+        public Sort getSort() {
+            return null;
+        }
+
+        @Override
+        public boolean isFirst() {
+            return false;
+        }
+
+        @Override
+        public boolean isLast() {
+            return false;
+        }
+
+        @Override
+        public boolean hasNext() {
+            return false;
+        }
+
+        @Override
+        public boolean hasPrevious() {
+            return false;
+        }
+
+        @Override
+        public Pageable nextPageable() {
+            return null;
+        }
+
+        @Override
+        public Pageable previousPageable() {
+            return null;
+        }
+
+        @Override
+        public <U> Page<U> map(Function<? super T, ? extends U> converter) {
+            return null;
+        }
+
+        @Override
+        public Iterator<T> iterator() {
+            return null;
+        }
     }
 }
