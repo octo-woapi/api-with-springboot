@@ -1,6 +1,10 @@
 package katapi.domain.product;
 
+import org.hibernate.validator.internal.util.stereotypes.Immutable;
+import org.springframework.boot.autoconfigure.domain.EntityScan;
+
 import java.math.BigDecimal;
+
 
 public class Product {
 

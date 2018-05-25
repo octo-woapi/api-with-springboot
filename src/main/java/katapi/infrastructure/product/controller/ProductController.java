@@ -4,6 +4,7 @@ import katapi.domain.product.Product;
 import katapi.domain.product.ProductSortAttributes;
 import katapi.infrastructure.product.rest.ProductResource;
 import katapi.infrastructure.product.service.ProductService;
+import katapi.infrastructure.product.service.ProductSortByNameService;
 import org.h2.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,8 +15,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import sun.jvm.hotspot.debugger.Page;
 
 import javax.validation.constraints.NotNull;
+import java.awt.print.Pageable;
 import java.net.URI;
 import java.util.Comparator;
 import java.util.List;
@@ -30,6 +33,9 @@ public class ProductController {
 
     @Autowired
     ProductService productService;
+
+    @Autowired
+    ProductSortByNameService productSortByNameService;
 
     @GetMapping(value = "", produces =  "application/hal+json")
     public Resources<ProductResource> listAllProductsHypermedia() {
@@ -47,6 +53,12 @@ public class ProductController {
             return getSortedProductList(sortParam);
         }
         return productService.getAllProducts();
+    }
+
+    @GetMapping(value = "/sortbyname", produces = {MediaType.APPLICATION_JSON_VALUE, "application/hal+json"})
+    public Page<Product> listPageSortAllProduct(Pageable pageable){
+        Page<Product> products = productSortByNameService.listAllByPageByPrice(pageable);
+        return products;
     }
 
     @GetMapping(value = "/{productId}", produces = {MediaType.APPLICATION_JSON_VALUE, "application/hal+json"})

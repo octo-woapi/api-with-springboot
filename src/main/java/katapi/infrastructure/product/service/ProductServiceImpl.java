@@ -3,22 +3,29 @@ package katapi.infrastructure.product.service;
 import katapi.domain.product.Product;
 import katapi.infrastructure.product.exception.ProductNotFoundException;
 import katapi.infrastructure.product.persistence.ProductDao;
+import katapi.infrastructure.product.persistence.ProductSortByNameRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
+import java.awt.print.Pageable;
 import java.math.BigDecimal;
 import java.util.List;
 
 @Component
-public class ProductServiceImpl implements ProductService{
+public class ProductServiceImpl implements ProductService, ProductSortByNameService {
 
     private static final Logger log = LoggerFactory.getLogger(ProductServiceImpl.class);
 
     @Autowired
     private ProductDao productDao;
+
+    @Autowired
+    private ProductSortByNameRepository productSortByNameRepository;
+
 
     @Override
     public List<Product> getAllProducts() { return productDao.getAllProducts(); }
@@ -54,5 +61,10 @@ public class ProductServiceImpl implements ProductService{
         if(name == null) throw new IllegalArgumentException("Param 'name' is required");
         if(price == null) throw new IllegalArgumentException("Param 'price' is required");
         if(weight == null) throw new IllegalArgumentException("Param 'weight' is required");
+    }
+
+    @Override
+    public Page<Product> listAllByPageByPrice(Pageable pageable) {
+        return productSortByNameRepository.findAll((org.springframework.data.domain.Pageable) pageable);
     }
 }
