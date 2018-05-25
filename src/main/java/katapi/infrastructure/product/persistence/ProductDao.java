@@ -18,7 +18,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @Repository
-public class ProductDao  {
+public class ProductDao<T extends Product,ID extends Serializable> implements PagingAndSortingRepository<T,ID>  {
 
     @Autowired
     JdbcTemplate jdbc;
@@ -53,5 +53,76 @@ public class ProductDao  {
 
     public int deleteProductFromItsID(Long id) {
         return jdbc.update("DELETE FROM Product WHERE id = ?", new Object[] {id});
+    }
+
+    @Override
+    public Iterable<T> findAll(Sort sort) {
+        String query = "SELECT * FROM Product";
+
+        for (Sort.Order o : sort) {
+            query += " ORDER BY " + o.getProperty() + " " + o.getDirection().toString() + " ";
+        }
+
+        return jdbc.query(query, new BeanPropertyRowMapper(Product.class));
+    }
+
+    @Override
+    public Page<T> findAll(Pageable pageable) {
+        return null;
+    }
+
+    @Override
+    public <S extends T> S save(S entity) {
+        return null;
+    }
+
+    @Override
+    public <S extends T> Iterable<S> saveAll(Iterable<S> entities) {
+        return null;
+    }
+
+    @Override
+    public Optional<T> findById(ID id) {
+        return Optional.empty();
+    }
+
+    @Override
+    public boolean existsById(ID id) {
+        return false;
+    }
+
+    @Override
+    public Iterable<T> findAll() {
+        return null;
+    }
+
+    @Override
+    public Iterable<T> findAllById(Iterable<ID> ids) {
+        return null;
+    }
+
+    @Override
+    public long count() {
+        return 0;
+    }
+
+    @Override
+    public void deleteById(ID id) {
+
+    }
+
+    @Override
+    public void delete(T entity) {
+
+    }
+
+    @Override
+    public void deleteAll(Iterable<? extends T> entities) {
+
+    }
+
+    @Override
+    public void deleteAll() {
+
     }
 }
