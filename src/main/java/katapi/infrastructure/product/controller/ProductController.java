@@ -33,7 +33,7 @@ public class ProductController {
     @Autowired
     ProductService productService;
 
-
+    //Basic GET for HYPERMEDIA showing the process of transforming a POJO into HAL Resource
     @GetMapping(value = "", produces =  "application/hal+json")
     public Resources<ProductResource> listAllProductsHypermedia() {
         List<ProductResource> productResourceList = productService.getAllProducts()
@@ -44,20 +44,10 @@ public class ProductController {
         return new Resources<>(productResourceList);
     }
 
-//    @GetMapping(value = "", produces =  "application/json")
-//    public List<Product> listAllProducts(@RequestParam(value = "sort", required = false) String sortParam) {
-//        if(! StringUtils.isNullOrEmpty(sortParam)) {
-//            return getSortedProductList(sortParam);
-//        }
-//        return productService.getAllProducts();
-//    }
-
     @GetMapping(value = "", produces =  "application/json")
-    public List<Product> listAllProductsByPage(@RequestParam(value = "sort", required = false) String sortParam, @RequestParam(value = "page", defaultValue = "1") Integer page) {
-            return getSortedProductPageList(sortParam, page);
+    public List<Product> listAllProductsByPage(@RequestParam(value = "sort", required = false) String sortParam, @RequestParam(value = "range", required = false) String range) {
+            return getSortedAndPaginatedProductList(sortParam, range);
     }
-
-
 
     @GetMapping(value = "/{productId}", produces = {MediaType.APPLICATION_JSON_VALUE, "application/hal+json"})
     public ProductResource getProductById(@PathVariable Long productId){
@@ -78,32 +68,43 @@ public class ProductController {
         productService.deleteProductFromItsID(productId);
     }
 
+
     /* ****************************************************************************************************************
                                                     PRIVATE METHODS
     **************************************************************************************************************** */
 
-    private List<Product> getSortedProductList(@NotNull String sortParam) {
-        if(ProductSortAttributes.contains(sortParam)) {
+    private List<Product> getSortedAndPaginatedProductList(String sortParam, String range) {
+        List<Product> productList = getSortedProductList(sortParam);
+        return paginateProductList(productList, range);
+    }
+
+    private List<Product> paginateProductList(List<Product> productList, String range) {
+        if(StringUtils.isNullOrEmpty(range)){
+            return productList;
+        }
+        int startIndex = getStartIndexFromRange(range);
+        int endIndex = getEndIndexFromRange(range);
+        return productList.subList(startIndex, endIndex);
+    }
+
+    private int getStartIndexFromRange(String range) {
+        return 0;
+    }
+
+    private int getEndIndexFromRange(String range) {
+        return 12;
+    }
+
+    private List<Product> getSortedProductList(String sortParam) {
+        if (ProductSortAttributes.contains(sortParam)) {
             return productService.getAllProducts()
                     .stream()
                     .sorted(Objects.requireNonNull(chooseAttributeToCompare(sortParam)))
                     .collect(Collectors.toList());
-        }else{
+        } else {
             return productService.getAllProducts();
         }
-
     }
-
-    private List<Product> getSortedProductPageList(@NotNull String sortParam, int page) {
-        int startPage = (page-1)* this.PRODUCT_PER_PAGE;
-        int endPage = startPage + this.PRODUCT_PER_PAGE;
-        List<Product> sortedListProducts = this.getSortedProductList(sortParam);
-        endPage = sortedListProducts.size() < endPage ? sortedListProducts.size() : endPage;
-        return sortedListProducts.subList(startPage, endPage);
-
-    }
-
-
 
     private Comparator<Product> chooseAttributeToCompare(@NotNull String sortParam){
         for (ProductSortAttributes attribute : ProductSortAttributes.values()) {

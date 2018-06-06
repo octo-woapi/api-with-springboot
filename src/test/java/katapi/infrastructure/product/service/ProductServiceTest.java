@@ -32,7 +32,7 @@ public class ProductServiceTest {
         //when
         List<Product> allProducts = service.getAllProducts();
         //then
-        assertThat(allProducts.size(), is(7));
+        assertThat(allProducts.size(), is(12));
     }
 
     @Test
@@ -49,7 +49,7 @@ public class ProductServiceTest {
     @Test(expected = ProductNotFoundException.class)
     public void getProductById_shouldThrowProductNotFoundExceptionIfNotFound(){
         //given
-        Long productId = 14l;
+        Long productId = 143345l;
         //when
         Product product = service.getProductById(productId);
         //then

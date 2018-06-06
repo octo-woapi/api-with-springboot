@@ -3,6 +3,7 @@ package katapi.infrastructure.product.controller;
 import katapi.KatapiApp;
 import katapi.domain.product.Product;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -82,8 +83,12 @@ public class ProductControllerTest {
         this.mockMvc = webAppContextSetup(webApplicationContext).build();
     }
 
+    /*****************************************
+     *               GET
+     *************************************** */
+
     @Test
-    public void listAllProducts_shouldReturnAllProductsInDB() throws Exception {
+    public void getAllProducts_shouldReturnAllProductsInDB() throws Exception {
         mockMvc.perform(get("/products")
                 .accept(jsonType)
                 .contentType(jsonType))
@@ -91,12 +96,12 @@ public class ProductControllerTest {
                 .andDo(print())
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON + ";charset=UTF-8"))
                 .andExpect(content().contentType(jsonType))
-                .andExpect(jsonPath("$", hasSize(2)))
+                .andExpect(jsonPath("$", hasSize(12)))
         ;
     }
 
     @Test
-    public void listAllProductsHypermedia_shouldReturnAllProductsInDBInHypermedia() throws Exception {
+    public void getAllProductsHypermedia_shouldReturnAllProductsInDBInHypermedia() throws Exception {
         mockMvc.perform(get("/products")
                 .accept(MediaTypes.HAL_JSON)
                 .contentType(MediaTypes.HAL_JSON))
@@ -104,93 +109,8 @@ public class ProductControllerTest {
                 .andDo(print())
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, MediaTypes.HAL_JSON_VALUE + ";charset=UTF-8"))
                 .andExpect(content().contentType(halJsonType))
-                .andExpect(jsonPath("$._embedded.productResources", hasSize(7)))
+                .andExpect(jsonPath("$._embedded.productResources", hasSize(12)))
         ;
-    }
-
-
-    @Test
-    public void listAllProducts_shouldSortByNameIfParamSortName() throws Exception{
-        mockMvc.perform(get("/products/?sort=name")
-                .accept(jsonType))
-                .andExpect(status().isOk())
-                .andDo(print())
-                .andExpect(content().contentType(jsonType))
-                .andExpect(jsonPath("$.[0].name", is("Cement bag 25kg")))
-                .andExpect(jsonPath("$.[1].name", is("Cement bag 50kg")))
-        ;
-    }
-
-    @Test
-    public void listAllProducts_shouldSortByWeightIfParamSortWeight() throws Exception{
-        mockMvc.perform(get("/products/?sort=weight")
-                .accept(jsonType))
-                .andExpect(status().isOk())
-                .andDo(print())
-                .andExpect(content().contentType(jsonType))
-                .andExpect(jsonPath("$.[0].weight", is(0.8)))
-                .andExpect(jsonPath("$.[1].weight", is(19.0)))
-
-        ;
-    }
-
-    @Test
-    public void listAllProducts_shouldSortByPriceIfParamSortPrice() throws Exception{
-        mockMvc.perform(get("/products/?sort=price")
-                .accept(jsonType))
-                .andExpect(status().isOk())
-                .andDo(print())
-                .andExpect(content().contentType(jsonType))
-                .andExpect(jsonPath("$.[0].price", is(0.50)))
-                .andExpect(jsonPath("$.[1].price", is(1.50)))
-        ;
-    }
-
-
-    @Test
-    public void listAllProducts_Page2_shouldSortByPriceIfParamSortPrice() throws Exception{
-        mockMvc.perform(get("/products/?sort=price&page=2")
-                .accept(jsonType))
-                .andExpect(status().isOk())
-                .andDo(print())
-                .andExpect(content().contentType(jsonType))
-                .andExpect(jsonPath("$.[0].price", is(12.0)))
-                .andExpect(jsonPath("$.[1].price", is(15.0)))
-        ;
-    }
-
-    @Test
-    public void listAllProducts_Page4_shouldGiveOneProductSortByPrice() throws Exception{
-        mockMvc.perform(get("/products/?sort=price&page=4")
-                .accept(jsonType))
-                .andExpect(status().isOk())
-                .andDo(print())
-                .andExpect(content().contentType(jsonType))
-                .andExpect(jsonPath("$.[0].price", is(149.99)));
-    }
-
-    @Test
-    public void listAllProducts_shouldTIgnoreWrongSearchParam() throws Exception{
-        mockMvc.perform(get("/products/?sort=zezefzefzefzf")
-                .accept(jsonType))
-                .andExpect(status().isOk())
-                .andDo(print())
-                .andExpect(content().contentType(jsonType))
-                .andExpect(jsonPath("$", hasSize(2)))
-                .andExpect(jsonPath("$.[0].price", is(25.0)))
-                .andExpect(jsonPath("$.[1].price", is(15.0)));
-    }
-
-    @Test
-    public void listAllProducts_shouldIgnoreEmptySearchParam() throws Exception{
-        mockMvc.perform(get("/products/?sort=")
-                .accept(jsonType))
-                .andExpect(status().isOk())
-                .andDo(print())
-                .andExpect(content().contentType(jsonType))
-                .andExpect(jsonPath("$", hasSize(2)))
-                .andExpect(jsonPath("$.[0].weight", is(50.0)))
-                .andExpect(jsonPath("$.[1].weight", is(25.0)));
     }
 
     @Test
@@ -220,6 +140,10 @@ public class ProductControllerTest {
         ;
     }
 
+    /*****************************************
+     *               POST
+     *************************************** */
+    
     @Test
     public void createProduct_shouldReturnAProductWithID() throws Exception {
         String name = "tested";
@@ -278,11 +202,16 @@ public class ProductControllerTest {
         ;
     }
 
+    /*****************************************
+     *               DELETE
+     *************************************** */
+    
     @Test
     public void deleteProduct_shouldReturn204() throws Exception {
         int idToBeTested = 2;
         mockMvc.perform(delete("/products/"+idToBeTested))
-                .andExpect(status().isNoContent());
+                .andExpect(status().isNoContent())
+        ;
     }
 
     @Test
@@ -291,9 +220,124 @@ public class ProductControllerTest {
         mockMvc.perform(delete("/products/"+idToBeTested))
                 .andExpect(status().isNotFound())
                 .andExpect(content().string(containsString("could not find product with id : "+idToBeTested)))
-                ;
+        ;
     }
 
+    /*****************************************
+     *               SORTING
+     *************************************** */
+
+    @Test
+    public void getAllProducts_shouldSortByNameIfParamSortName() throws Exception{
+        mockMvc.perform(get("/products/?sort=name")
+                .accept(jsonType))
+                .andExpect(status().isOk())
+                .andDo(print())
+                .andExpect(content().contentType(jsonType))
+                .andExpect(jsonPath("$.[0].name", is("Cement bag 25kg")))
+                .andExpect(jsonPath("$.[11].name", is("Screw box 75mm 50 units")))
+        ;
+    }
+
+    @Test
+    public void getAllProducts_shouldSortByWeightIfParamSortWeight() throws Exception{
+        mockMvc.perform(get("/products/?sort=weight")
+                .accept(jsonType))
+                .andExpect(status().isOk())
+                .andDo(print())
+                .andExpect(content().contentType(jsonType))
+                .andExpect(jsonPath("$.[0].weight", is(0.8)))
+                .andExpect(jsonPath("$.[11].weight", is(855.0)))
+
+        ;
+    }
+
+    @Test
+    public void getAllProducts_shouldSortByPriceIfParamSortPrice() throws Exception{
+        mockMvc.perform(get("/products/?sort=price")
+                .accept(jsonType))
+                .andExpect(status().isOk())
+                .andDo(print())
+                .andExpect(content().contentType(jsonType))
+                .andExpect(jsonPath("$.[0].price", is(0.50)))
+                .andExpect(jsonPath("$.[11].price", is(149.99)))
+        ;
+    }
+
+    @Test
+    public void getAllProducts_shouldIgnoreWrongSortParam() throws Exception{
+        mockMvc.perform(get("/products/?sort=zezefzefzefzf")
+                .accept(jsonType))
+                .andExpect(status().isOk())
+                .andDo(print())
+                .andExpect(content().contentType(jsonType))
+                .andExpect(jsonPath("$.[0].id", is(1)))
+                .andExpect(jsonPath("$.[1].id", is(2)))
+                .andExpect(jsonPath("$.[11].id", is(12)))
+        ;
+    }
+
+    @Test
+    public void getAllProducts_shouldIgnoreEmptySortParam() throws Exception{
+        mockMvc.perform(get("/products/?sort=")
+                .accept(jsonType))
+                .andExpect(status().isOk())
+                .andDo(print())
+                .andExpect(content().contentType(jsonType))
+                .andExpect(jsonPath("$.[0].id", is(1)))
+                .andExpect(jsonPath("$.[11].id", is(12)))
+        ;
+    }
+
+    /*****************************************
+     *               PAGINATION
+     *************************************** */
+    @Ignore
+    @Test
+    public void getAllProducts_shouldReturnProductsFrom4to7IfRange4to7() throws Exception{
+        mockMvc.perform(get("/products/?range=4-7")
+                .accept(jsonType))
+                .andExpect(status().isPartialContent())
+                .andDo(print())
+                .andExpect(content().contentType(jsonType))
+                .andExpect(jsonPath("$", hasSize(3)))
+                .andExpect(jsonPath("$.[0].id", is(4)))
+                .andExpect(jsonPath("$.[3].id", is(7)))
+        ;
+    }
+
+    @Ignore
+    @Test
+    public void getAllProducts_shouldReturnProductsFrom5to10IfRange5to10() throws Exception{
+        mockMvc.perform(get("/products/?range=5-10")
+                .accept(jsonType))
+                .andExpect(status().isPartialContent())
+                .andDo(print())
+                .andExpect(content().contentType(jsonType))
+                .andExpect(jsonPath("$", hasSize(6)))
+                .andExpect(jsonPath("$.[0].id", is(5)))
+                .andExpect(jsonPath("$.[5].id", is(10)))
+        ;
+    }
+
+    @Ignore
+    @Test
+    public void getAllProducts_shouldHaveLinkContentRangeAcceptRangeHeaderWhenPaginating() throws Exception{
+        mockMvc.perform(get("/products/?range=5-10"))
+                .andDo(print())
+                //.andExpect(header().string(HttpHeaders.LINK, "</products/?range=11-12>; rel=\"next\";"))
+                .andExpect(header().string(HttpHeaders.CONTENT_RANGE, "5-10/12"))
+                .andExpect(header().string(HttpHeaders.ACCEPT_RANGES, "product 10"))
+        ;
+    }
+
+    @Ignore
+    @Test
+    public void getAllProducts_shouldlimitPaginationTo10elements() throws  Exception{
+        mockMvc.perform(get("/products/?range=1-12"))
+                .andExpect(jsonPath("$", hasSize(10)))
+        ;
+    }
 
     /* ****************************************************************************************************************
                                                     PRIVATE METHODS

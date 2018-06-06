@@ -55,6 +55,11 @@ public class KatapiApp implements CommandLineRunner {
         jdbc.batchUpdate("INSERT INTO product (id, name, price, weight) values (5, 'Concrete reinforcing rod 25 units', 12.0, 20.0)");
         jdbc.batchUpdate("INSERT INTO product (id, name, price, weight) values (6, 'Concrete blockwork 1 unit', 1.50, 19.0)");
         jdbc.batchUpdate("INSERT INTO product (id, name, price, weight) values (7, 'Concrete blockwork small pallet 45 units', 45.0, 855.0)");
+        jdbc.batchUpdate("INSERT INTO product (id, name, price, weight) values (8, 'Screw box 25mm 100 units', 5.0, 1.0)");
+        jdbc.batchUpdate("INSERT INTO product (id, name, price, weight) values (9, 'Screw box 25mm 200 units', 10.0, 2.0)");
+        jdbc.batchUpdate("INSERT INTO product (id, name, price, weight) values (10, 'Screw box 75mm 50 units', 10.0, 2.5)");
+        jdbc.batchUpdate("INSERT INTO product (id, name, price, weight) values (11, 'Screw box 75mm 100 units', 20.0, 5.0)");
+        jdbc.batchUpdate("INSERT INTO product (id, name, price, weight) values (12, 'Screw box 100mm 50 units', 25.0, 3.0)");
 
         log.info("Checking product count");
         log.info(jdbc.queryForObject("SELECT COUNT(*) FROM product", Integer.class).toString());
