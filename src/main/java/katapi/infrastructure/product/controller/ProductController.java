@@ -95,9 +95,11 @@ public class ProductController {
     }
 
     private List<Product> getSortedProductPageList(@NotNull String sortParam, int page) {
-        int index = (page-1)* this.PRODUCT_PER_PAGE;
+        int startPage = (page-1)* this.PRODUCT_PER_PAGE;
+        int endPage = startPage + this.PRODUCT_PER_PAGE;
         List<Product> sortedListProducts = this.getSortedProductList(sortParam);
-        return sortedListProducts.subList(index, index + this.PRODUCT_PER_PAGE);
+        endPage = sortedListProducts.size() < endPage ? sortedListProducts.size() : endPage;
+        return sortedListProducts.subList(startPage, endPage);
 
     }
 

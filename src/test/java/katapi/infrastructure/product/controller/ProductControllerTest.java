@@ -160,6 +160,16 @@ public class ProductControllerTest {
     }
 
     @Test
+    public void listAllProducts_Page4_shouldGiveOneProductSortByPrice() throws Exception{
+        mockMvc.perform(get("/products/?sort=price&page=4")
+                .accept(jsonType))
+                .andExpect(status().isOk())
+                .andDo(print())
+                .andExpect(content().contentType(jsonType))
+                .andExpect(jsonPath("$.[0].price", is(149.99)));
+    }
+
+    @Test
     public void listAllProducts_shouldTIgnoreWrongSearchParam() throws Exception{
         mockMvc.perform(get("/products/?sort=zezefzefzefzf")
                 .accept(jsonType))
