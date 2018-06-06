@@ -4,7 +4,6 @@ import katapi.domain.product.Product;
 import katapi.domain.product.ProductSortAttributes;
 import katapi.infrastructure.product.rest.ProductResource;
 import katapi.infrastructure.product.service.ProductService;
-import katapi.infrastructure.product.service.ProductSortByNameService;
 import org.h2.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,9 +19,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.constraints.NotNull;
 import java.awt.print.Pageable;
 import java.net.URI;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
@@ -31,11 +28,11 @@ public class ProductController {
 
     private static final Logger log = LoggerFactory.getLogger(ProductController.class);
 
+    private int PRODUCT_PER_PAGE = 2;
+
     @Autowired
     ProductService productService;
 
-    @Autowired
-    ProductSortByNameService productSortByNameService;
 
     @GetMapping(value = "", produces =  "application/hal+json")
     public Resources<ProductResource> listAllProductsHypermedia() {
@@ -47,19 +44,20 @@ public class ProductController {
         return new Resources<>(productResourceList);
     }
 
+//    @GetMapping(value = "", produces =  "application/json")
+//    public List<Product> listAllProducts(@RequestParam(value = "sort", required = false) String sortParam) {
+//        if(! StringUtils.isNullOrEmpty(sortParam)) {
+//            return getSortedProductList(sortParam);
+//        }
+//        return productService.getAllProducts();
+//    }
+
     @GetMapping(value = "", produces =  "application/json")
-    public List<Product> listAllProducts(@RequestParam(value = "sort", required = false) String sortParam) {
-        if(! StringUtils.isNullOrEmpty(sortParam)) {
-            return getSortedProductList(sortParam);
-        }
-        return productService.getAllProducts();
+    public List<Product> listAllProductsByPage(@RequestParam(value = "sort", required = false) String sortParam, @RequestParam(value = "page", defaultValue = "1") Integer page) {
+            return getSortedProductPageList(sortParam, page);
     }
 
-    @GetMapping(value = "/sortbyname", produces = {MediaType.APPLICATION_JSON_VALUE, "application/hal+json"})
-    public Page<Product> listPageSortAllProduct(Pageable pageable){
-        Page<Product> products = productSortByNameService.listAllByPageByPrice(pageable);
-        return products;
-    }
+
 
     @GetMapping(value = "/{productId}", produces = {MediaType.APPLICATION_JSON_VALUE, "application/hal+json"})
     public ProductResource getProductById(@PathVariable Long productId){
@@ -95,6 +93,15 @@ public class ProductController {
         }
 
     }
+
+    private List<Product> getSortedProductPageList(@NotNull String sortParam, int page) {
+        int index = (page-1)* this.PRODUCT_PER_PAGE;
+        List<Product> sortedListProducts = this.getSortedProductList(sortParam);
+        return sortedListProducts.subList(index, index + this.PRODUCT_PER_PAGE);
+
+    }
+
+
 
     private Comparator<Product> chooseAttributeToCompare(@NotNull String sortParam){
         for (ProductSortAttributes attribute : ProductSortAttributes.values()) {

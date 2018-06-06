@@ -3,7 +3,6 @@ package katapi.infrastructure.product.service;
 import katapi.domain.product.Product;
 import katapi.infrastructure.product.exception.ProductNotFoundException;
 import katapi.infrastructure.product.persistence.ProductDao;
-import katapi.infrastructure.product.persistence.ProductSortByNameRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,15 +15,12 @@ import java.math.BigDecimal;
 import java.util.List;
 
 @Component
-public class ProductServiceImpl implements ProductService, ProductSortByNameService {
+public class ProductServiceImpl implements ProductService{
 
     private static final Logger log = LoggerFactory.getLogger(ProductServiceImpl.class);
 
     @Autowired
     private ProductDao productDao;
-
-    @Autowired
-    private ProductSortByNameRepository productSortByNameRepository;
 
 
     @Override
@@ -63,8 +59,4 @@ public class ProductServiceImpl implements ProductService, ProductSortByNameServ
         if(weight == null) throw new IllegalArgumentException("Param 'weight' is required");
     }
 
-    @Override
-    public Page<Product> listAllByPageByPrice(Pageable pageable) {
-        return productSortByNameRepository.findAll((org.springframework.data.domain.Pageable) pageable);
-    }
 }

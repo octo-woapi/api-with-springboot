@@ -91,7 +91,7 @@ public class ProductControllerTest {
                 .andDo(print())
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON + ";charset=UTF-8"))
                 .andExpect(content().contentType(jsonType))
-                .andExpect(jsonPath("$", hasSize(7)))
+                .andExpect(jsonPath("$", hasSize(2)))
         ;
     }
 
@@ -108,6 +108,7 @@ public class ProductControllerTest {
         ;
     }
 
+
     @Test
     public void listAllProducts_shouldSortByNameIfParamSortName() throws Exception{
         mockMvc.perform(get("/products/?sort=name")
@@ -117,7 +118,6 @@ public class ProductControllerTest {
                 .andExpect(content().contentType(jsonType))
                 .andExpect(jsonPath("$.[0].name", is("Cement bag 25kg")))
                 .andExpect(jsonPath("$.[1].name", is("Cement bag 50kg")))
-                .andExpect(jsonPath("$.[6].name", is("Red bricks small pallet 250 units")))
         ;
     }
 
@@ -130,7 +130,7 @@ public class ProductControllerTest {
                 .andExpect(content().contentType(jsonType))
                 .andExpect(jsonPath("$.[0].weight", is(0.8)))
                 .andExpect(jsonPath("$.[1].weight", is(19.0)))
-                .andExpect(jsonPath("$.[6].weight", is(855.0)))
+
         ;
     }
 
@@ -143,7 +143,19 @@ public class ProductControllerTest {
                 .andExpect(content().contentType(jsonType))
                 .andExpect(jsonPath("$.[0].price", is(0.50)))
                 .andExpect(jsonPath("$.[1].price", is(1.50)))
-                .andExpect(jsonPath("$.[6].price", is(149.99)))
+        ;
+    }
+
+
+    @Test
+    public void listAllProducts_Page2_shouldSortByPriceIfParamSortPrice() throws Exception{
+        mockMvc.perform(get("/products/?sort=price&page=2")
+                .accept(jsonType))
+                .andExpect(status().isOk())
+                .andDo(print())
+                .andExpect(content().contentType(jsonType))
+                .andExpect(jsonPath("$.[0].price", is(12.0)))
+                .andExpect(jsonPath("$.[1].price", is(15.0)))
         ;
     }
 
@@ -154,7 +166,9 @@ public class ProductControllerTest {
                 .andExpect(status().isOk())
                 .andDo(print())
                 .andExpect(content().contentType(jsonType))
-                .andExpect(jsonPath("$", hasSize(7)));
+                .andExpect(jsonPath("$", hasSize(2)))
+                .andExpect(jsonPath("$.[0].price", is(25.0)))
+                .andExpect(jsonPath("$.[1].price", is(15.0)));
     }
 
     @Test
@@ -164,7 +178,9 @@ public class ProductControllerTest {
                 .andExpect(status().isOk())
                 .andDo(print())
                 .andExpect(content().contentType(jsonType))
-                .andExpect(jsonPath("$", hasSize(7)));
+                .andExpect(jsonPath("$", hasSize(2)))
+                .andExpect(jsonPath("$.[0].weight", is(50.0)))
+                .andExpect(jsonPath("$.[1].weight", is(25.0)));
     }
 
     @Test
@@ -267,6 +283,7 @@ public class ProductControllerTest {
                 .andExpect(content().string(containsString("could not find product with id : "+idToBeTested)))
                 ;
     }
+
 
     /* ****************************************************************************************************************
                                                     PRIVATE METHODS
