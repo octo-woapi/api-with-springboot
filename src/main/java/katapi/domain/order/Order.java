@@ -26,7 +26,7 @@ public class Order {
         BigDecimal total = productList.stream().map(product -> product.getPrice()).reduce(BigDecimal.ZERO, BigDecimal::add).setScale(2, BigDecimal.ROUND_HALF_UP);
 
         if(total.compareTo(new BigDecimal("1000")) > 0){
-            return total.subtract(total.multiply(new BigDecimal("0.05"))).setScale(2, BigDecimal.ROUND_HALF_UP);
+            return total.subtract(total.multiply(new BigDecimal("0.05"))).setScale(2, BigDecimal.ROUND_HALF_EVEN);
         }else {
             return total;
         }

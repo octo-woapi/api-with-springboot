@@ -19,13 +19,13 @@ public class ProductDao{
     JdbcTemplate jdbc;
 
     public List<Product> getAllProducts() {
-        List<Product> result = jdbc.query("SELECT * FROM Product", new BeanPropertyRowMapper(Product.class));
+        List<Product> result = jdbc.query("SELECT * FROM Products", new BeanPropertyRowMapper(Product.class));
         return result;
     }
 
     public Product getProductById(Long id){
         Product result = (Product) jdbc.queryForObject(
-                "SELECT * FROM Product WHERE id = ?"
+                "SELECT * FROM Products WHERE id = ?"
                 , new Object[] {id}
                 , new BeanPropertyRowMapper(Product.class));
         return result;
@@ -35,7 +35,7 @@ public class ProductDao{
         GeneratedKeyHolder keyHolder = new GeneratedKeyHolder();
         jdbc.update(con -> {
             PreparedStatement ps = con.prepareStatement(
-                    "INSERT INTO Product (name, price, weight) VALUES (?, ?, ?)",
+                    "INSERT INTO Products (name, price, weight) VALUES (?, ?, ?)",
                     new String[]{"id"});
             ps.setString(1, product.getName());
             ps.setDouble(2, product.getPrice().doubleValue());
@@ -47,6 +47,6 @@ public class ProductDao{
     }
 
     public int deleteProductFromItsID(Long id) {
-        return jdbc.update("DELETE FROM Product WHERE id = ?", new Object[] {id});
+        return jdbc.update("DELETE FROM Products WHERE id = ?", new Object[] {id});
     }
 }
