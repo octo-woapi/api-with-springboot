@@ -51,6 +51,8 @@ dependencies {
     // https://mvnrepository.com/artifact/org.javamoney/moneta-bp
     //compile group: 'org.javamoney', name: 'moneta-bp', version: '1.1'
 
+    compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.0'
+
 }
 
 jar {

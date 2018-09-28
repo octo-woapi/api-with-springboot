@@ -1,23 +1,20 @@
 package katapi.infrastructure.product.controller;
 
 import katapi.domain.product.Product;
-import katapi.domain.product.ProductSortAttributes;
 import katapi.infrastructure.product.rest.ProductResource;
 import katapi.infrastructure.product.service.ProductService;
-import org.h2.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Resources;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.constraints.NotNull;
-import java.awt.print.Pageable;
+import javax.servlet.http.HttpServletResponse;
 import java.net.URI;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -28,12 +25,19 @@ public class ProductController {
 
     private static final Logger log = LoggerFactory.getLogger(ProductController.class);
 
-    private int PRODUCT_PER_PAGE = 2;
+    static final int MAX_RANGE = 5;
 
     @Autowired
     ProductService productService;
 
-    //Basic GET for HYPERMEDIA showing the process of transforming a POJO into HAL Resource
+    /*************************************************************************
+                                    GET methods
+    ************************************************************************ */
+
+    /**
+     * Basic GET for HYPERMEDIA showing the process of transforming a POJO into HAL Resource
+     * @return
+     */
     @GetMapping(value = "", produces =  "application/hal+json")
     public Resources<ProductResource> listAllProductsHypermedia() {
         List<ProductResource> productResourceList = productService.getAllProducts()
@@ -44,15 +48,66 @@ public class ProductController {
         return new Resources<>(productResourceList);
     }
 
-    @GetMapping(value = "", produces =  "application/json")
-    public List<Product> listAllProductsByPage(@RequestParam(value = "sort", required = false) String sortParam, @RequestParam(value = "range", required = false) String range) {
-            return getSortedAndPaginatedProductList(sortParam, range);
+    /**
+     * Handles pagination with a HTTP 206 Partial Content status
+     * @param sortParam
+     * @param range
+     * @return Prodcut list, sorted, paginated
+     */
+    @GetMapping(value = "", produces =  "application/json", params = {"sort", "range"})
+    @ResponseStatus(HttpStatus.PARTIAL_CONTENT)
+    public List<Product> listAllProductsSortedAndPaginated(
+            @RequestParam(value = "sort", required = false) String sortParam,
+            @RequestParam(value = "range", required = false) String range,
+            final HttpServletResponse response) {
+
+        int totalCount = productService.getAllProducts().size();
+
+        response.setHeader(HttpHeaders.ACCEPT_RANGES, "product "+MAX_RANGE);
+        response.setHeader(HttpHeaders.CONTENT_RANGE , range+"/"+totalCount);
+
+        return productService.getSortedAndPaginatedProductList(sortParam, range, MAX_RANGE);
     }
+
+    @GetMapping(value = "", produces =  "application/json", params = {"range"})
+    @ResponseStatus(HttpStatus.PARTIAL_CONTENT)
+    public List<Product> listAllProductsPaginated(
+            @RequestParam(value = "range", required = false) String range,
+            final HttpServletResponse response) {
+
+        int totalCount = productService.getAllProducts().size();
+
+        response.setHeader(HttpHeaders.ACCEPT_RANGES, "product "+MAX_RANGE);
+        response.setHeader(HttpHeaders.CONTENT_RANGE , range+"/"+totalCount);
+
+        return productService.getSortedAndPaginatedProductList(null, range, MAX_RANGE);
+    }
+
+    @GetMapping(value = "", produces =  "application/json", params = {"sort"})
+    @ResponseStatus(HttpStatus.OK)
+    public List<Product> listAllProductsSorted(@RequestParam(value = "sort", required = false) String sortParam) {
+        return productService.getSortedAndPaginatedProductList(sortParam, null, MAX_RANGE);
+    }
+
+    /**
+     * Simple call with all results and a HTTP 200 status
+     * @return
+     */
+    @GetMapping(value = "", produces =  "application/json", params = {})
+    @ResponseStatus(HttpStatus.OK)
+    public List<Product> listAllProducts() {
+        return productService.getAllProducts();
+    }
+
 
     @GetMapping(value = "/{productId}", produces = {MediaType.APPLICATION_JSON_VALUE, "application/hal+json"})
     public ProductResource getProductById(@PathVariable Long productId){
         return new ProductResource(productService.getProductById(productId));
     }
+
+    /*************************************************************************
+                                    POST methods
+     ************************************************************************ */
 
     @PostMapping(value = "", produces = {MediaType.APPLICATION_JSON_VALUE, "application/hal+json"})
     @ResponseStatus(HttpStatus.CREATED)
@@ -62,6 +117,10 @@ public class ProductController {
         return ResponseEntity.created(URI.create(linkToThisProduct.getHref())).body(createdProduct);
     }
 
+    /*************************************************************************
+                                    DELETE methods
+     ************************************************************************ */
+
     @DeleteMapping("/{productId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteProductById(@PathVariable Long productId){
@@ -69,50 +128,5 @@ public class ProductController {
     }
 
 
-    /* ****************************************************************************************************************
-                                                    PRIVATE METHODS
-    **************************************************************************************************************** */
-
-    private List<Product> getSortedAndPaginatedProductList(String sortParam, String range) {
-        List<Product> productList = getSortedProductList(sortParam);
-        return paginateProductList(productList, range);
-    }
-
-    private List<Product> paginateProductList(List<Product> productList, String range) {
-        if(StringUtils.isNullOrEmpty(range)){
-            return productList;
-        }
-        int startIndex = getStartIndexFromRange(range);
-        int endIndex = getEndIndexFromRange(range);
-        return productList.subList(startIndex, endIndex);
-    }
-
-    private int getStartIndexFromRange(String range) {
-        return 0;
-    }
-
-    private int getEndIndexFromRange(String range) {
-        return 12;
-    }
-
-    private List<Product> getSortedProductList(String sortParam) {
-        if (ProductSortAttributes.contains(sortParam)) {
-            return productService.getAllProducts()
-                    .stream()
-                    .sorted(Objects.requireNonNull(chooseAttributeToCompare(sortParam)))
-                    .collect(Collectors.toList());
-        } else {
-            return productService.getAllProducts();
-        }
-    }
-
-    private Comparator<Product> chooseAttributeToCompare(@NotNull String sortParam){
-        for (ProductSortAttributes attribute : ProductSortAttributes.values()) {
-            if (attribute.getAttributeLowerCase().equals(sortParam)) {
-                return attribute.getComparator();
-            }
-        }
-        return null;
-    }
 
 }

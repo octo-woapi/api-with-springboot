@@ -21,7 +21,7 @@ import static org.junit.Assert.assertThat;
 @SpringBootTest(classes = KatapiApp.class)
 @WebAppConfiguration
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
-public class ProductServiceTest {
+public class ProductServiceImplTest {
 
     @Autowired
     ProductService service;
@@ -134,5 +134,44 @@ public class ProductServiceTest {
         service.deleteProductFromItsID(idToBeDeleted);
         //then exception
     }
+
+    @Test
+    public void paginateProductList_shouldReturn3productsIfRangeIs2to5(){
+        //given
+        String range ="2-5";
+        int maxRange = 5;
+        List<Product> allProducts = service.getAllProducts();
+        //when
+        List<Product> result = service.paginateProductList(allProducts, range, maxRange);
+        //then
+        assertThat(result.size(), is(3));
+    }
+
+    @Test
+    public void paginateProductList_shouldIgnoreRangeIfWrongFormat(){
+        //given
+        String range ="2-a";
+        int maxRange = 5;
+        List<Product> allProducts = service.getAllProducts();
+        //when
+        List<Product> result = service.paginateProductList(allProducts, range, maxRange);
+        //then
+        assertThat(result.size(), is(maxRange));
+    }
+
+    @Test
+    public void paginateProductList_shouldReturnMAX_RANGEproductsIfRangeIsToBig(){
+        //given
+        String range ="2-500";
+        int maxRange = 5;
+        List<Product> allProducts = service.getAllProducts();
+        //when
+        List<Product> result = service.paginateProductList(allProducts, range, maxRange);
+        //then
+        assertThat(result.size(), is(maxRange));
+    }
+
+
+
 
 }

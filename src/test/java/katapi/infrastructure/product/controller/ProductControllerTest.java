@@ -292,21 +292,32 @@ public class ProductControllerTest {
     /*****************************************
      *               PAGINATION
      *************************************** */
-    @Ignore
+
     @Test
-    public void getAllProducts_shouldReturnProductsFrom4to7IfRange4to7() throws Exception{
+    public void getAllProductsSorted_shouldReturnProductsFrom4to7IfRange4to7() throws Exception{
         mockMvc.perform(get("/products/?range=4-7")
                 .accept(jsonType))
                 .andExpect(status().isPartialContent())
                 .andDo(print())
                 .andExpect(content().contentType(jsonType))
                 .andExpect(jsonPath("$", hasSize(3)))
-                .andExpect(jsonPath("$.[0].id", is(4)))
-                .andExpect(jsonPath("$.[3].id", is(7)))
+                .andExpect(jsonPath("$.[0].id", is(5)))
+                .andExpect(jsonPath("$.[2].id", is(7)))
         ;
     }
 
-    @Ignore
+    @Test
+    public void getAllProductsSorted_shouldStartPaginationAt0() throws Exception{
+        mockMvc.perform(get("/products/?range=0-2")
+                .accept(jsonType))
+                .andExpect(status().isPartialContent())
+                .andDo(print())
+                .andExpect(content().contentType(jsonType))
+                .andExpect(jsonPath("$", hasSize(2)))
+                .andExpect(jsonPath("$.[0].id", is(1)))
+        ;
+    }
+
     @Test
     public void getAllProducts_shouldReturnProductsFrom5to10IfRange5to10() throws Exception{
         mockMvc.perform(get("/products/?range=5-10")
@@ -314,28 +325,26 @@ public class ProductControllerTest {
                 .andExpect(status().isPartialContent())
                 .andDo(print())
                 .andExpect(content().contentType(jsonType))
-                .andExpect(jsonPath("$", hasSize(6)))
-                .andExpect(jsonPath("$.[0].id", is(5)))
-                .andExpect(jsonPath("$.[5].id", is(10)))
+                .andExpect(jsonPath("$", hasSize(5)))
+                .andExpect(jsonPath("$.[0].id", is(6)))
+                .andExpect(jsonPath("$.[4].id", is(10)))
         ;
     }
 
-    @Ignore
     @Test
-    public void getAllProducts_shouldHaveLinkContentRangeAcceptRangeHeaderWhenPaginating() throws Exception{
+    public void getAllProductsSorted_shouldHaveLinkContentRangeAcceptRangeHeaderWhenPaginating() throws Exception{
         mockMvc.perform(get("/products/?range=5-10"))
                 .andDo(print())
                 //.andExpect(header().string(HttpHeaders.LINK, "</products/?range=11-12>; rel=\"next\";"))
                 .andExpect(header().string(HttpHeaders.CONTENT_RANGE, "5-10/12"))
-                .andExpect(header().string(HttpHeaders.ACCEPT_RANGES, "product 10"))
+                .andExpect(header().string(HttpHeaders.ACCEPT_RANGES, "product 5"))
         ;
     }
 
-    @Ignore
     @Test
-    public void getAllProducts_shouldlimitPaginationTo10elements() throws  Exception{
+    public void getAllProductsSorted_shouldlimitPaginationTo5elements() throws  Exception{
         mockMvc.perform(get("/products/?range=1-12"))
-                .andExpect(jsonPath("$", hasSize(10)))
+                .andExpect(jsonPath("$", hasSize(5)))
         ;
     }
 
