@@ -2,6 +2,8 @@
 > Kata products implemented in Spring Boot
 
 ## Getting started
+
+  You must have Java 1.8 installed on your computer
   
  - Install [Gradle](https://gradle.org/install/)   
  - Create a new directory and clone the project : ```$ git clone https://github.com/octo-woapi/api-with-springboot.git```
