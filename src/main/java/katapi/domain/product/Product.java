@@ -10,8 +10,8 @@ public class Product {
 
     private Long id;
     private String name;
-    private BigDecimal price;
-    private BigDecimal weight;
+    private BigDecimal price = BigDecimal.ZERO;
+    private BigDecimal weight = BigDecimal.ZERO;
 
     public Product() {
     }

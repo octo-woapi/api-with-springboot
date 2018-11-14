@@ -1,6 +1,7 @@
 package katapi.domain.order;
 
 import katapi.domain.product.Product;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,12 +14,14 @@ import java.util.concurrent.ThreadLocalRandom;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
 public class OrderTest {
 
     private static final Logger log = LoggerFactory.getLogger(OrderTest.class);
 
+    /* ****************** Adding products **************** */
 
     @Test
     public void addProduct_shouldCreateNewProductListIfItsNull(){
@@ -42,14 +45,165 @@ public class OrderTest {
         assertThat(tested.getProductList().size(), is(4));
     }
 
+    /* ****************** Product amount **************** */
+
+    @Test
+    public void getProductAmount_shouldReturnTheSumOfAllProductsPrice(){
+        //given
+        Order tested = new Order();
+        Product testProduct1 = new Product();
+        testProduct1.setPrice(new BigDecimal(5));
+        Product testProduct2 = new Product();
+        testProduct2.setPrice(new BigDecimal(1.3));
+
+        tested.addProduct(testProduct1);
+        tested.addProduct(testProduct1);
+        tested.addProduct(testProduct1);
+        tested.addProduct(testProduct2);
+        //when
+        BigDecimal productAmount = tested.getProductAmount();
+        //then
+        assertThat(productAmount, is(new BigDecimal("16.30")));
+    }
+
+    @Test
+    public void getProductAmount_shouldReturn0IfNoProduct(){
+        //given
+        Order tested = new Order();
+        //when
+        BigDecimal productAmount = tested.getProductAmount();
+        //then
+        assertThat(productAmount, is(BigDecimal.ZERO));
+    }
+
+    /* ****************** Total weight **************** */
+
+    @Test
+    public void getTotalWeight_shouldReturnZeroIfNoProduct(){
+        //given
+        Order tested = new Order();
+        //when
+        BigDecimal totalWeight = tested.getTotalWeight();
+        //then
+        assertThat(totalWeight, is(BigDecimal.ZERO));
+    }
+
+    @Test
+    public void getTotalWeight_shouldReturnTotalWeight(){
+        //given
+        Order tested = new Order();
+        Product testProduct1 = new Product();
+        testProduct1.setWeight(new BigDecimal(50.0));
+        Product testProduct2 = new Product();
+        testProduct2.setWeight(new BigDecimal(51.13));
+
+        tested.addProduct(testProduct1);
+        tested.addProduct(testProduct2);
+        //when
+        BigDecimal totalWeight = tested.getTotalWeight();
+        //then
+        assertThat(totalWeight, is(new BigDecimal("101.13")));
+    }
+
+    /* ****************** Shimpent amount **************** */
+
+    @Test
+    public void orderShipmentAmount_shouldBeZeroIfOrderTotalWeightLT10kg(){
+        //given
+        Order tested = new Order();
+        Product testProduct1 = new Product();
+        testProduct1.setWeight(new BigDecimal(5));
+        tested.addProduct(testProduct1);
+        //when
+        BigDecimal shipmentAmount = tested.getShipmentAmount();
+        //then
+        assertEquals(shipmentAmount, BigDecimal.ZERO);
+    }
+
+    @Test
+    public void orderShipmentAmount_shouldBeZero0ifWeightIsZero(){
+        //given
+        Order tested = new Order();
+        //when
+        BigDecimal shipmentAmount = tested.getShipmentAmount();
+        //then
+        assertEquals(shipmentAmount, BigDecimal.ZERO);
+    }
+
+    @Test
+    public void orderShipmentAmount_shouldBe25IfOrderTotalWeightIsExactly10kg(){
+        //given
+        Order tested = new Order();
+        Product testProduct1 = new Product();
+        testProduct1.setWeight(new BigDecimal(10.0));
+        tested.addProduct(testProduct1);
+        //when
+        BigDecimal shipmentAmount = tested.getShipmentAmount();
+        //then
+        assertThat(shipmentAmount, is(new BigDecimal("25")));
+    }
+
+    @Test
+    public void orderShipmentAmount_shouldBe25IfOrderTotalWeightGT10kg(){
+        //given
+        Order tested = new Order();
+        Product testProduct1 = new Product();
+        testProduct1.setWeight(new BigDecimal(12.5));
+        tested.addProduct(testProduct1);
+        //when
+        BigDecimal shipmentAmount = tested.getShipmentAmount();
+        //then
+        assertThat(shipmentAmount, is(new BigDecimal("25")));
+    }
+
+    @Test
+    public void orderShipmentAmount_shouldBe50IfOrderTotalWeightGT20kg(){
+        //given
+        Order tested = new Order();
+        Product testProduct1 = new Product();
+        testProduct1.setWeight(new BigDecimal(22.5));
+        tested.addProduct(testProduct1);
+        //when
+        BigDecimal shipmentAmount = tested.getShipmentAmount();
+        //then
+        assertThat(shipmentAmount, is(new BigDecimal("50")));
+    }
+
+    @Test
+    public void orderShipmentAmount_shouldBe25MoreEach10kg(){
+        //given
+        Order tested = new Order();
+        Product testProduct1 = new Product();
+        testProduct1.setWeight(new BigDecimal(12.5));
+        tested.addProduct(testProduct1);
+
+        //when-then
+        BigDecimal shipmentAmount = tested.getShipmentAmount();
+        assertThat(shipmentAmount, is(new BigDecimal("25")));
+
+        Product testProduct2 = new Product();
+        testProduct2.setWeight(new BigDecimal(10));
+        tested.addProduct(testProduct2);
+        shipmentAmount = tested.getShipmentAmount();
+        assertThat(shipmentAmount, is(new BigDecimal("50")));
+
+        Product testProduct3 = new Product();
+        testProduct3.setWeight(new BigDecimal(90));
+        tested.addProduct(testProduct3);
+        shipmentAmount = tested.getShipmentAmount();
+        assertThat(shipmentAmount, is(new BigDecimal("275")));
+    }
+
+    /* ************** Total amount with discount ************** */
+
     @Test
     public void orderTotalAmount_shouldHave5PercentDiscountWhenTotalPriceExceed1000(){
         //given
         Order tested = new Order();
         Product testProduct1 = new Product();
-        testProduct1.setPrice(new BigDecimal("500.0"));
+        testProduct1.setPrice(new BigDecimal(500.0));
         Product testProduct2 = new Product();
-        testProduct2.setPrice(new BigDecimal("501.0"));
+        testProduct2.setPrice(new BigDecimal(501.0));
 
         tested.addProduct(testProduct1);
         tested.addProduct(testProduct2);
@@ -75,7 +229,7 @@ public class OrderTest {
         //when
         BigDecimal totalAmount = tested.getTotalAmount();
         BigDecimal totalTested = randomPrice.add(randomPrice2);
-        BigDecimal totalWithDiscount = totalTested.subtract(totalTested.multiply(new BigDecimal("0.05"))).setScale(2, BigDecimal.ROUND_HALF_UP);
+        BigDecimal totalWithDiscount = totalTested.subtract(totalTested.multiply(new BigDecimal(0.05))).setScale(2, BigDecimal.ROUND_HALF_UP);
         //then
         assertThat(totalAmount, is(totalWithDiscount));
     }
@@ -103,9 +257,9 @@ public class OrderTest {
         //given
         Order tested = new Order();
         Product testProduct1 = new Product();
-        testProduct1.setPrice(new BigDecimal("50.0"));
+        testProduct1.setPrice(new BigDecimal(50.0));
         Product testProduct2 = new Product();
-        testProduct2.setPrice(new BigDecimal("501.0"));
+        testProduct2.setPrice(new BigDecimal(501.0));
 
         tested.addProduct(testProduct1);
         tested.addProduct(testProduct2);
@@ -120,11 +274,11 @@ public class OrderTest {
         //given
         Order tested = new Order();
         Product testProduct1 = new Product();
-        testProduct1.setPrice(new BigDecimal("50.45"));
+        testProduct1.setPrice(new BigDecimal(50.45));
         Product testProduct2 = new Product();
-        testProduct2.setPrice(new BigDecimal("65.034"));
+        testProduct2.setPrice(new BigDecimal(65.034));
         Product testProduct3 = new Product();
-        testProduct3.setPrice(new BigDecimal("3.543"));
+        testProduct3.setPrice(new BigDecimal(3.543));
 
         tested.addProduct(testProduct1);
         tested.addProduct(testProduct2);
@@ -142,7 +296,28 @@ public class OrderTest {
         //when
         BigDecimal totalAmount = tested.getTotalAmount();
         //then
-        assertThat(totalAmount, is(new BigDecimal("0.00")));
+        assertThat(totalAmount, is(BigDecimal.ZERO));
+    }
+
+    @Test
+    public void orderTotalAmount_shouldAddShipmentToPrice(){
+        //given
+        Order tested = new Order();
+        Product testProduct1 = new Product();
+        testProduct1.setPrice(new BigDecimal(50.45));
+        testProduct1.setWeight(new BigDecimal(10));
+        Product testProduct2 = new Product();
+        testProduct2.setPrice(new BigDecimal(65.034));
+        testProduct2.setWeight(new BigDecimal(12));
+
+        tested.addProduct(testProduct1);
+        tested.addProduct(testProduct2);
+
+        // when
+        BigDecimal totalAmount = tested.getTotalAmount();
+
+        //then 110.484 + 50
+        assertThat(totalAmount, is(new BigDecimal("165.48")));
     }
 
     
