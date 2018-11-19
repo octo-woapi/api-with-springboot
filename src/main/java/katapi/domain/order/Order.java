@@ -113,11 +113,8 @@ public class Order {
     public Order() {
     }
 
-    public Order(List<Product> productList, BigDecimal shipmentAmount, BigDecimal totalAmount, BigDecimal totalWeight) {
+    public Order(List<Product> productList) {
         this.productList = productList;
-        this.shipmentAmount = shipmentAmount;
-        this.totalAmount = totalAmount;
-        this.totalWeight = totalWeight;
     }
 
     @Override
@@ -135,7 +132,6 @@ public class Order {
 
     @Override
     public int hashCode() {
-
         return Objects.hash(id, status, productList, shipmentAmount, totalAmount, totalWeight);
     }
 

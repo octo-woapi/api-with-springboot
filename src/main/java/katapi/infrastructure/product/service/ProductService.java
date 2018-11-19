@@ -13,7 +13,7 @@ public interface ProductService {
 
     public Product createProduct(String name, BigDecimal price, BigDecimal weight);
 
-    public void deleteProductFromItsID(Long id);
+    public void deleteProduct(Long id);
 
     public List<Product> paginateProductList(List<Product> productList, String range, int maxRange);
 

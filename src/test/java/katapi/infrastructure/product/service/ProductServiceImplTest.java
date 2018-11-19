@@ -121,7 +121,7 @@ public class ProductServiceImplTest {
         int howManyProducts = service.getAllProducts().size();
         Long idToBeDeleted = 3l;
         //when
-        service.deleteProductFromItsID(idToBeDeleted);
+        service.deleteProduct(idToBeDeleted);
         //then
         assertThat(service.getAllProducts().size(), is(howManyProducts-1));
     }
@@ -131,7 +131,7 @@ public class ProductServiceImplTest {
         //given
         Long idToBeDeleted = 334l;
         //when
-        service.deleteProductFromItsID(idToBeDeleted);
+        service.deleteProduct(idToBeDeleted);
         //then exception
     }
 

@@ -33,8 +33,8 @@ public class ProductDao{
 
     public Long insertProductAndReturnGeneratedID(Product product){
         GeneratedKeyHolder keyHolder = new GeneratedKeyHolder();
-        jdbc.update(con -> {
-            PreparedStatement ps = con.prepareStatement(
+        jdbc.update(connection -> {
+            PreparedStatement ps = connection.prepareStatement(
                     "INSERT INTO Products (name, price, weight) VALUES (?, ?, ?)",
                     new String[]{"id"});
             ps.setString(1, product.getName());
@@ -43,7 +43,9 @@ public class ProductDao{
             return ps;
         }, keyHolder);
 
-        return keyHolder.getKey().longValue();
+        product.setId(keyHolder.getKey().longValue());
+
+        return product.getId();
     }
 
     public int deleteProductFromItsID(Long id) {

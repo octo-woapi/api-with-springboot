@@ -51,7 +51,7 @@ public class ProductServiceImpl implements ProductService{
     }
 
     @Override
-    public void deleteProductFromItsID(Long id) {
+    public void deleteProduct(Long id) {
         int nbRowsDeleted = productDao.deleteProductFromItsID(id);
         if(nbRowsDeleted == 0){ throw new ProductNotFoundException(id); }
     }
