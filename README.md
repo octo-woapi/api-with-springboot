@@ -1,5 +1,8 @@
 # api-with-springboot
-> Kata products implemented in Spring Boot
+> [Katapi](https://github.com/octo-woapi/katapi) kata implemented in Spring Boot
+
+## Status
+> Runnable
 
 ## Getting started
 
