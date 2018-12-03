@@ -228,8 +228,8 @@ public class OrderTest {
         tested.addProduct(testProduct2);
         //when
         BigDecimal totalAmount = tested.getTotalAmount();
-        BigDecimal totalTested = randomPrice.add(randomPrice2);
-        BigDecimal totalWithDiscount = totalTested.subtract(totalTested.multiply(new BigDecimal(0.05))).setScale(2, BigDecimal.ROUND_HALF_UP);
+        BigDecimal totalRandom = randomPrice.add(randomPrice2);
+        BigDecimal totalWithDiscount = totalRandom.subtract(totalRandom.multiply(new BigDecimal("0.05"))).setScale(2, BigDecimal.ROUND_HALF_EVEN);
         //then
         assertThat(totalAmount, is(totalWithDiscount));
     }
